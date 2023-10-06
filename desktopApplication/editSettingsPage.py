@@ -1,6 +1,5 @@
 import sys
-import typing
-from PyQt6 import QtCore
+from profile import Profile
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QLineEdit, QLabel, QGridLayout, QWidget
 
@@ -10,7 +9,7 @@ class profileInputWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         # Define the title of the application
-        self.setWindowTitle("RoboTuner")
+        self.setWindowTitle("RoboTuner Settings")
 
         # Create a button and a variable that tracks if the button is toggled
         self.saveButton = QPushButton("Save Profile")
@@ -18,7 +17,7 @@ class profileInputWindow(QMainWindow):
 
         # Link the button with created functions and toggle variable
         self.saveButton.clicked.connect(self.saveProfile)
-        self.clearButton.clicked.connect(self.clearProfile)
+        self.clearButton.clicked.connect(self.setTextBoxesToProfile)
 
         # Create a textbox and label for slide max length
         self.slideMaxLengthInput = QLineEdit()
@@ -42,7 +41,6 @@ class profileInputWindow(QMainWindow):
 
         # Set text boxes to initial values
         self.loadProfile()
-        self.setTextBoxesToDefault()
 
         # Create the layout for the app
         layout = QGridLayout()
@@ -65,33 +63,31 @@ class profileInputWindow(QMainWindow):
         self.setCentralWidget(container)
 
     # Helper function to set all slide fields to initial values
-    def setTextBoxesToDefault(self):
-        defaultSlideMaxLength = self.profileData[0]
-        defaultSlideMinLength = self.profileData[1]
-        defaultSlideMaxSpeed = self.profileData[2]
-        defaultSlideMinSpeed = self.profileData[3]
+    def setTextBoxesToProfile(self):
+        profile = self.profile
 
-        self.slideMaxLengthInput.setText(defaultSlideMaxLength)
-        self.slideMinLengthInput.setText(defaultSlideMinLength)
-        self.slideMaxSpeedInput.setText(defaultSlideMaxSpeed)
-        self.slideMinSpeedInput.setText(defaultSlideMinSpeed)
+        maxLength, minLength, maxSpeed, minSpeed = profile.getStringValues()
 
-    # Function to clear a profile to initial state, Will be
-    def resetProfile(self):
-        self.setTextBoxesToDefault()
+        self.slideMaxLengthInput.setText(maxLength)
+        self.slideMinLengthInput.setText(minLength)
+        self.slideMaxSpeedInput.setText(maxSpeed)
+        self.slideMinSpeedInput.setText(minSpeed)
+
 
     # Foundation to save 
     # Not working version of profile system, temporary testing solution
     def saveProfile(self):
-        self.profileData = [self.slideMaxLengthInput.text(),
-                            self.slideMinLengthInput.text(),
-                            self.slideMaxSpeedInput.text(),
-                            self.slideMinSpeedInput.text()]
+        profile = self.profile
+        profile.slideMaxLength = self.slideMaxLengthInput.text()
+        profile.slideMinLength = self.slideMinLengthInput.text()
+        profile.slideMaxSpeed = self.slideMaxSpeedInput.text()
+        profile.slideMinSpeed = self.slideMinSpeedInput.text()
         
     # Sets profile data as initial values for all fields
     # Testing solution until profile data structure is made
     def loadProfile(self):
-        self.profileData = [4, 0, 4, 2]
+        self.profile = Profile()
+        self.setTextBoxesToProfile()
 
 app = QApplication(sys.argv)
 
