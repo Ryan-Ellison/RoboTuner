@@ -13,3 +13,5 @@ class Profile:
         
     def getStringValues(self) -> tuple:
         return (str(self.slideMaxLength), str(self.slideMinLength), str(self.slideMaxSpeed), str(self.slideMinSpeed))
+    
+    

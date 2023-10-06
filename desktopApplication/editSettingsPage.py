@@ -4,7 +4,7 @@ from profile import Profile
 from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QLineEdit, QLabel, QGridLayout, QWidget
 
 # Subclass QMainWindow to customize application's profile setting menu
-class profileInputWindow(QMainWindow):
+class ProfileInputWindow(QMainWindow):
 
     def __init__(self) -> None:
         super().__init__()
@@ -88,10 +88,10 @@ class profileInputWindow(QMainWindow):
     def loadProfile(self):
         self.profile = Profile()
         self.setTextBoxesToProfile()
-
+""" 
 app = QApplication(sys.argv)
 
-window = profileInputWindow()
+window = ProfileInputWindow()
 window.show()
 
-app.exec()
+app.exec() """
