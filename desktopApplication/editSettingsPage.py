@@ -16,11 +16,13 @@ class ProfileInputWindow(QMainWindow):
         self.saveButton = QPushButton("Save Profile")
         self.clearButton = QPushButton("Discard Changes")
         self.createProfileButton = QPushButton("Create Profile")
+        self.deleteProfileButton = QPushButton("Delete Current Profile")
 
         # Link the button with created functions and toggle variable
         self.saveButton.clicked.connect(self.saveProfile)
         self.clearButton.clicked.connect(self.setTextBoxesToProfile)
         self.createProfileButton.clicked.connect(self.createProfile)
+        self.deleteProfileButton.clicked.connect(self.confirmDeleteProfile)
 
         intRange = QIntValidator()
         intRange.setBottom(0)
@@ -72,7 +74,8 @@ class ProfileInputWindow(QMainWindow):
         layout.addWidget(self.slideMinSpeedInput, 3, 1)
         layout.addWidget(self.clearButton, 4, 0)   
         layout.addWidget(self.saveButton, 4, 1)
-        layout.addWidget(self.createProfileButton, 4, 2)
+        layout.addWidget(self.createProfileButton, 5, 0)
+        layout.addWidget(self.deleteProfileButton, 5, 1)
 
         # Utilize the layout as a widget
         container = QWidget()
@@ -82,7 +85,7 @@ class ProfileInputWindow(QMainWindow):
         self.setCentralWidget(container)
 
     # Update the current set profile when a new one is selected from the dropdown
-    def changeProfile(self, index):
+    def changeProfile(self, _):
         profile = self.profileDropdown.currentText()
         self.profile = self.profiles[profile]
         self.setTextBoxesToProfile()
@@ -94,31 +97,54 @@ class ProfileInputWindow(QMainWindow):
         self.slideMinLengthInput.setText(minLength)
         self.slideMaxSpeedInput.setText(maxSpeed)
         self.slideMinSpeedInput.setText(minSpeed)
-
+   
+    # Function to create a profile
     def createProfile(self):
         name, confirmed = QInputDialog.getText(self, 'New Profile Name', 'Enter the new profile\'s name:')
         if confirmed:
             if name in self.profiles.keys():
-                print("yo")
-                nameTakenWarning = QDialog()
-                nameTakenWarning.setWindowTitle("Name Taken!")
-                
-                warningButton = QDialogButtonBox.StandardButton.Ok
-
-                buttonBox = QDialogButtonBox(warningButton)
-                buttonBox.accepted.connect(nameTakenWarning.accept)
-
-                nameTakenWarning.layout = QVBoxLayout()
-                nameTakenWarning.layout.addWidget(QLabel("Error: This name is already in use."))
-                nameTakenWarning.layout.addWidget(buttonBox)
-                nameTakenWarning.setLayout(nameTakenWarning.layout)
-
+                self.generateWarningDialog("Name Taken!", "This name is already in use.\nPlease choose another name.")
             else:
                 profile = Profile(name)
                 self.profile = profile
                 self.profiles[name] = profile
                 self.populateDropdown()
                 self.updateProfilesFiles()
+
+    # Function to confirm the user wants to delete the current profile
+    def confirmDeleteProfile(self):
+        deleteProfileWarning = QDialog()
+        deleteProfileWarning.setWindowTitle("Confirm Profile Deletion")
+
+        warningButtons = QDialogButtonBox.StandardButton.Yes | QDialogButtonBox.StandardButton.No
+
+        # accept and reject connections close the dialog box
+        buttonBox = QDialogButtonBox(warningButtons)
+        buttonBox.accepted.connect(deleteProfileWarning.accept)
+        buttonBox.rejected.connect(deleteProfileWarning.reject)
+
+        # Delete the profile only when confirmation is accepted
+        buttonBox.accepted.connect(self.deleteProfile)
+
+        deleteProfileWarning.layout = QVBoxLayout()
+        deleteProfileWarning.layout.addWidget(QLabel("Are you sure you want to delete this profile?"))
+        deleteProfileWarning.layout.addWidget(buttonBox)
+        deleteProfileWarning.setLayout(deleteProfileWarning.layout)
+
+        deleteProfileWarning.exec()
+    
+    # Function to delete the current profile
+    def deleteProfile(self):
+        if len(self.profiles) == 1:
+            self.generateWarningDialog("Not Enough Profiles", "If you delete this profile there won't be any left.\nPlease create a new profile before deleting this one.")
+        else:
+            self.profiles.pop(self.profile.name, Profile("-99"))
+            if self.profileDropdown.itemText(0) == self.profile.name:
+                self.profile = self.profiles[self.profileDropdown.itemText(1)]
+            else:
+                self.profile = self.profiles[self.profileDropdown.itemText(0)]
+            self.updateProfilesFiles()
+            self.populateDropdown()
 
     # Updates the profile class object and calls to update the save file
     def saveProfile(self):
@@ -177,6 +203,22 @@ class ProfileInputWindow(QMainWindow):
         self.profileDropdown.setCurrentText(self.profile.name)
         self.setTextBoxesToProfile()
 
+    # Create a warning dialog with specified window title and message
+    def generateWarningDialog(self, windowTitle, message):
+        warning = QDialog()
+        warning.setWindowTitle(windowTitle)
+        
+        warningButton = QDialogButtonBox.StandardButton.Ok
+
+        buttonBox = QDialogButtonBox(warningButton)
+        buttonBox.accepted.connect(warning.accept)
+
+        warning.layout = QVBoxLayout()
+        warning.layout.addWidget(QLabel(message))
+        warning.layout.addWidget(buttonBox)
+        warning.setLayout(warning.layout)
+
+        warning.exec()
 
 """ 
 app = QApplication(sys.argv)
