@@ -1,7 +1,7 @@
 import sys
 from profile import Profile
 
-from PyQt6.QtWidgets import QComboBox, QMainWindow, QPushButton, QLineEdit, QLabel, QGridLayout, QWidget
+from PyQt6.QtWidgets import QComboBox, QMainWindow, QPushButton, QLineEdit, QLabel, QGridLayout, QWidget, QInputDialog, QDialog, QDialogButtonBox, QVBoxLayout
 from PyQt6.QtGui import QIntValidator
 
 # Subclass QMainWindow to customize application's profile setting menu
@@ -15,10 +15,12 @@ class ProfileInputWindow(QMainWindow):
         # Create a button and a variable that tracks if the button is toggled
         self.saveButton = QPushButton("Save Profile")
         self.clearButton = QPushButton("Discard Changes")
+        self.createProfileButton = QPushButton("Create Profile")
 
         # Link the button with created functions and toggle variable
         self.saveButton.clicked.connect(self.saveProfile)
         self.clearButton.clicked.connect(self.setTextBoxesToProfile)
+        self.createProfileButton.clicked.connect(self.createProfile)
 
         intRange = QIntValidator()
         intRange.setBottom(0)
@@ -49,6 +51,7 @@ class ProfileInputWindow(QMainWindow):
         self.slideMinSpeedLabel.setText("Min slide speed before error thrown (in/sec)")
 
         # Set text boxes to initial values
+        self.profile = None
         self.loadProfiles()
 
         # Create and populate the dropdown menu for profiles
@@ -69,6 +72,7 @@ class ProfileInputWindow(QMainWindow):
         layout.addWidget(self.slideMinSpeedInput, 3, 1)
         layout.addWidget(self.clearButton, 4, 0)   
         layout.addWidget(self.saveButton, 4, 1)
+        layout.addWidget(self.createProfileButton, 4, 2)
 
         # Utilize the layout as a widget
         container = QWidget()
@@ -91,6 +95,30 @@ class ProfileInputWindow(QMainWindow):
         self.slideMaxSpeedInput.setText(maxSpeed)
         self.slideMinSpeedInput.setText(minSpeed)
 
+    def createProfile(self):
+        name, confirmed = QInputDialog.getText(self, 'New Profile Name', 'Enter the new profile\'s name:')
+        if confirmed:
+            if name in self.profiles.keys():
+                print("yo")
+                nameTakenWarning = QDialog()
+                nameTakenWarning.setWindowTitle("Name Taken!")
+                
+                warningButton = QDialogButtonBox.StandardButton.Ok
+
+                buttonBox = QDialogButtonBox(warningButton)
+                buttonBox.accepted.connect(nameTakenWarning.accept)
+
+                nameTakenWarning.layout = QVBoxLayout()
+                nameTakenWarning.layout.addWidget(QLabel("Error: This name is already in use."))
+                nameTakenWarning.layout.addWidget(buttonBox)
+                nameTakenWarning.setLayout(nameTakenWarning.layout)
+
+            else:
+                profile = Profile(name)
+                self.profile = profile
+                self.profiles[name] = profile
+                self.populateDropdown()
+                self.updateProfilesFiles()
 
     # Updates the profile class object and calls to update the save file
     def saveProfile(self):
@@ -137,14 +165,17 @@ class ProfileInputWindow(QMainWindow):
     # Writes all existing profiles to the save file
     def updateProfilesFiles(self, file="desktopApplication/.profiles.txt"):
         openFile = open(file, "w")
-        for profile in list(self.profiles.values()):
+        for profileName in sorted(list(self.profiles.keys()), key=lambda s: s.casefold()):
+            profile = self.profiles[profileName]
             openFile.write(profile.generateSaveFileText())
         openFile.close()
 
     # Adds all profiles to the dropdown menu
     def populateDropdown(self):
         self.profileDropdown.clear()
-        self.profileDropdown.addItems(sorted(list(self.profiles.keys())))
+        self.profileDropdown.addItems(sorted(list(self.profiles.keys()), key=lambda s: s.casefold()))
+        self.profileDropdown.setCurrentText(self.profile.name)
+        self.setTextBoxesToProfile()
 
 
 """ 
