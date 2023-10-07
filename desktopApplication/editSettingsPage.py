@@ -17,12 +17,14 @@ class ProfileInputWindow(QMainWindow):
         self.clearButton = QPushButton("Discard Changes")
         self.createProfileButton = QPushButton("Create Profile")
         self.deleteProfileButton = QPushButton("Delete Current Profile")
+        self.renameProfileButton = QPushButton("Rename Current Profile")
 
         # Link the button with created functions and toggle variable
         self.saveButton.clicked.connect(self.saveProfile)
         self.clearButton.clicked.connect(self.setTextBoxesToProfile)
         self.createProfileButton.clicked.connect(self.createProfile)
         self.deleteProfileButton.clicked.connect(self.confirmDeleteProfile)
+        self.renameProfileButton.clicked.connect(self.renameProfile)
 
         intRange = QIntValidator()
         intRange.setBottom(0)
@@ -76,6 +78,7 @@ class ProfileInputWindow(QMainWindow):
         layout.addWidget(self.saveButton, 4, 1)
         layout.addWidget(self.createProfileButton, 5, 0)
         layout.addWidget(self.deleteProfileButton, 5, 1)
+        layout.addWidget(self.renameProfileButton, 5, 2)
 
         # Utilize the layout as a widget
         container = QWidget()
@@ -83,6 +86,18 @@ class ProfileInputWindow(QMainWindow):
 
         # Place the layout in the app window
         self.setCentralWidget(container)
+
+    # Rename the current profile
+    def renameProfile(self):
+        name, confirmed = QInputDialog.getText(self, 'New Profile Name', 'Enter the new profile\'s name:')
+        if confirmed:
+            if name in self.profiles.keys():
+                self.generateWarningDialog("Name Taken!", "This name is already in use.\nPlease choose another name.")
+            else:
+                self.profiles[name] = self.profiles.pop(self.profile.name)
+                self.profile.name = name
+                self.populateDropdown()
+                self.updateProfilesFiles()
 
     # Update the current set profile when a new one is selected from the dropdown
     def changeProfile(self, _):
