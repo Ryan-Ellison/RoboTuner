@@ -1,5 +1,7 @@
 import sys
 from profile import Profile
+from datetime import datetime
+from functools import cmp_to_key
 
 from PyQt6.QtWidgets import QComboBox, QMainWindow, QPushButton, QLineEdit, QLabel, QGridLayout, QWidget, QInputDialog, QDialog, QDialogButtonBox, QVBoxLayout
 from PyQt6.QtGui import QIntValidator
@@ -18,6 +20,8 @@ class ProfileInputWindow(QMainWindow):
         self.createProfileButton = QPushButton("Create Profile")
         self.deleteProfileButton = QPushButton("Delete Current Profile")
         self.renameProfileButton = QPushButton("Rename Current Profile")
+        self.sortOrderButton = QPushButton("Sort By Date")
+        self.sortByName = True
 
         # Link the button with created functions and toggle variable
         self.saveButton.clicked.connect(self.saveProfile)
@@ -25,6 +29,9 @@ class ProfileInputWindow(QMainWindow):
         self.createProfileButton.clicked.connect(self.createProfile)
         self.deleteProfileButton.clicked.connect(self.confirmDeleteProfile)
         self.renameProfileButton.clicked.connect(self.renameProfile)
+        self.sortOrderButton.clicked.connect(self.swapSortOrder)
+        self.sortOrderButton.setCheckable(True)
+        
 
         intRange = QIntValidator()
         intRange.setBottom(0)
@@ -76,6 +83,7 @@ class ProfileInputWindow(QMainWindow):
         layout.addWidget(self.slideMinSpeedInput, 3, 1)
         layout.addWidget(self.clearButton, 4, 0)   
         layout.addWidget(self.saveButton, 4, 1)
+        layout.addWidget(self.sortOrderButton, 4, 2)
         layout.addWidget(self.createProfileButton, 5, 0)
         layout.addWidget(self.deleteProfileButton, 5, 1)
         layout.addWidget(self.renameProfileButton, 5, 2)
@@ -86,6 +94,15 @@ class ProfileInputWindow(QMainWindow):
 
         # Place the layout in the app window
         self.setCentralWidget(container)
+
+    def swapSortOrder(self, toggled):
+        if toggled:
+            self.sortOrderButton.setText("Sort By Name")
+            self.sortByName = False
+        else:
+            self.sortOrderButton.setText("Sort By Date")
+            self.sortByName = True
+        self.populateDropdown()
 
     # Rename the current profile
     def renameProfile(self):
@@ -168,6 +185,7 @@ class ProfileInputWindow(QMainWindow):
         profile.slideMinLength = self.slideMinLengthInput.text()
         profile.slideMaxSpeed = self.slideMaxSpeedInput.text()
         profile.slideMinSpeed = self.slideMinSpeedInput.text()
+        profile.dateEdited = datetime.now()
 
         self.updateProfilesFiles()
         
@@ -192,12 +210,14 @@ class ProfileInputWindow(QMainWindow):
             print("file not found")
         else:
             lines = openFile.readlines()
-            for i in range(0, len(lines), 2):
+            for i in range(0, len(lines), 3):
                 name = lines[i].strip()
                 slideSettings = lines[i + 1].split(',')
                 slideSettings = [slideSettings[i].strip() for i in range(len(slideSettings))]
+                dateString = lines[i + 2].strip()
+                date = datetime.strptime(dateString, '%a %d %b %Y, %I:%M%p')
                 profile = Profile(name)
-                profile.setAllValues(slideSettings)
+                profile.setValuesAndDate(slideSettings, date)
                 profiles[name] = profile
         finally:
             openFile.close()
@@ -214,9 +234,24 @@ class ProfileInputWindow(QMainWindow):
     # Adds all profiles to the dropdown menu
     def populateDropdown(self):
         self.profileDropdown.clear()
-        self.profileDropdown.addItems(sorted(list(self.profiles.keys()), key=lambda s: s.casefold()))
+        if self.sortByName:
+            print("sorting by name")
+            self.profileDropdown.addItems(sorted(list(self.profiles.keys()), key=lambda s: s.casefold()))
+        else:
+            print("sorting by date")
+            self.profileDropdown.addItems(sorted(list(self.profiles.keys()), key=cmp_to_key(self.orderByDate)))
         self.profileDropdown.setCurrentText(self.profile.name)
         self.setTextBoxesToProfile()
+
+    def orderByDate(self, profileName1, profileName2):
+        profile1 = self.profiles[profileName1]
+        profile2 = self.profiles[profileName2]
+        if profile1.dateEdited < profile2.dateEdited:
+            return 1
+        elif profile1.dateEdited > profile2.dateEdited:
+            return -1
+        else:
+            return 0
 
     # Create a warning dialog with specified window title and message
     def generateWarningDialog(self, windowTitle, message):
