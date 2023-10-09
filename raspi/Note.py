@@ -21,6 +21,9 @@ class Note:
         self.name = name
         self.frequency = frequency
         self.midi = midi
+        self.total_times_played = 0
+        self.tendency = 0
+        self.total_cents = 0
 
     def __truediv__(self, other):
         return self/other
@@ -39,3 +42,13 @@ class Note:
         # 12 being total semitones, 100 being cents per semitones
 
         return cents
+
+    def adjust_tendency(self, cents):
+        self.total_times_played += 1
+        self.total_cents += cents
+        self.tendency = self.total_cents / self.total_times_played
+
+    def get_tendency(self):
+        return self.tendency
+
+

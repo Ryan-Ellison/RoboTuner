@@ -53,6 +53,9 @@ def tuner(audio_stream, sampling_rate, num_channels,
     hop_s = 512
 
     # Computes midi and hz values
+    #pitch_hz_o = pitch("specacf", win_s, hop_s, sampling_rate)
+    #pitch_midi_o = pitch("specacf", win_s, hop_s, sampling_rate)
+
     pitch_hz_o = pitch("yin", win_s, hop_s, sampling_rate)
     pitch_midi_o = pitch("yin", win_s, hop_s, sampling_rate)
 
@@ -64,7 +67,7 @@ def tuner(audio_stream, sampling_rate, num_channels,
 
     frames = []
 
-    for i in range(0, int((sampling_rate / frames_per_buffer) * .3)):
+    for i in range(0, int((sampling_rate / frames_per_buffer) * .2)):
         data = audio_stream.read(frames_per_buffer)
         frames.append(data)
 
