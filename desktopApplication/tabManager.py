@@ -1,6 +1,7 @@
 import sys
 from editSettingsPage import ProfileInputWindow
 from landingPage import LandingPage
+from cadFilesPage import CADFilesWindow
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
@@ -22,6 +23,7 @@ class TabManager(QMainWindow):
 
         tabs.addTab(LandingPage(), "Landing Page")
         tabs.addTab(ProfileInputWindow(), "Edit settings")
+        tabs.addTab(CADFilesWindow(), "CAD Files")
 
         self.setCentralWidget(tabs)
 
