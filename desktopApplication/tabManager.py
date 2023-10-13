@@ -1,4 +1,5 @@
 import sys
+import os
 from editSettingsPage import ProfileInputWindow
 from landingPage import LandingPage
 from cadFilesPage import CADFilesWindow
@@ -45,6 +46,11 @@ class TabManager(QMainWindow):
             self.timer.start(200)
         else:
             self.timer.setSingleShot(True)
+
+PATH = "/Users/ryanellison/VSCode Projects/RoboTuner/"
+
+sys.path.insert(0, PATH)
+os.chdir(PATH)
 
 app = QApplication(sys.argv)
 
