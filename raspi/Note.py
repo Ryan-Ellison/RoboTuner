@@ -37,6 +37,8 @@ class Note:
 
     def get_cents(self, frequency):
         ratio = (frequency / self.frequency)
+        if ratio is 0:
+            return 0
 
         cents = 1200 * math.log2(ratio)
         # 12 being total semitones, 100 being cents per semitones

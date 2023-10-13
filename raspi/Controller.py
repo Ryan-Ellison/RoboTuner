@@ -14,6 +14,7 @@ what to do
 """
 import time
 
+
 import pyaudio
 import statistics as stat
 import Tuner
@@ -55,9 +56,14 @@ while True:
 
     if not pitch[1] or not pitch[0]:
         continue
+    if pitch[1] == 0 or pitch[0] == 0:
+        continue
 
     midi = int(round(stat.median(pitch[1])))
+
     frequency = stat.median(pitch[0])
+    if midi <= 0:
+        continue
     nearest_note = notes[midi - 24]
     tendency = nearest_note.get_cents(frequency)
     nearest_note.adjust_tendency(tendency)
