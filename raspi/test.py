@@ -26,6 +26,8 @@ prev_step = 0
 step_mm_conv = 0.02
 kit_mm_conv = [1, 2, 4, 8]
 
+sleep_time = 0.001
+
 def print_step(x):
 	print(f"current step: {current_step},	current dist: {(current_step-prev_step)*0.02/kit_mm_conv[current_kit]}mm")
 	
@@ -44,20 +46,24 @@ def release_kits(x):
 
 while True:
 	if keyboard.is_pressed('1'):
-		current_kit = 0
-		release_kits(0)
+		sleep_time = 0.001
+		#current_kit = 0
+		#release_kits(0)
 		
 	if keyboard.is_pressed('2'):
-		current_kit = 1
-		release_kits(1)
+		sleep_time = 0.0025
+		#current_kit = 1
+		#release_kits(1)
 		
 	if keyboard.is_pressed('3'):
-		current_kit = 2
-		release_kits(2)
+		sleep_time = 0.005
+		#current_kit = 2
+		#release_kits(2)
 		
 	if keyboard.is_pressed('4'):
-		current_kit = 3
-		release_kits(3)
+		sleep_time = 0.01
+		#current_kit = 3
+		#release_kits(3)
 		
 	#if keyboard.is_pressed('l'):
 		#GPIO.output(22, GPIO.HIGH)
@@ -66,14 +72,14 @@ while True:
 		prev_step = current_step
 		#for i in range(1000):
 		current_step = kits[current_kit].stepper1.onestep(direction=stepper.FORWARD, style=stepper_style)
-		time.sleep(0.001)
+		time.sleep(sleep_time)
 		#print_step(None)
 		
 	elif keyboard.is_pressed('s'):
 		prev_step = current_step
 		#for i in range(1000):
 		current_step = kits[current_kit].stepper1.onestep(direction=stepper.BACKWARD, style=stepper_style)
-		time.sleep(0.001)
+		time.sleep(sleep_time)
 		#print_step(None)
 		
 	elif keyboard.is_pressed('a') and stepper_style != stepper.MICROSTEP:
