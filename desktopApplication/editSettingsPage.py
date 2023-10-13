@@ -3,7 +3,19 @@ from profile import Profile
 from datetime import datetime
 from functools import cmp_to_key
 
-from PyQt6.QtWidgets import QComboBox, QMainWindow, QPushButton, QLineEdit, QLabel, QGridLayout, QWidget, QInputDialog, QDialog, QDialogButtonBox, QVBoxLayout
+from PyQt6.QtWidgets import (
+    QComboBox, 
+    QMainWindow, 
+    QPushButton, 
+    QLineEdit, 
+    QLabel, 
+    QGridLayout, 
+    QWidget, 
+    QInputDialog, 
+    QDialog, 
+    QDialogButtonBox, 
+    QVBoxLayout
+)
 from PyQt6.QtGui import QIntValidator
 
 # Subclass QMainWindow to customize application's profile setting menu
