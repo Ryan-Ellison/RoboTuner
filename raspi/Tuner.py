@@ -11,6 +11,7 @@ This class measures the frequency of an audio sample
 
 from aubio import source
 from aubio import pitch
+import pyaudio
 import Note
 from Note import Note
 import wave
@@ -50,8 +51,9 @@ def tuner(audio_stream, sampling_rate, num_channels,
 
 
     # Window size of fft and size of hop
-    win_s = 4096
+    win_s = 2048
     hop_s = 512
+
 
     # Computes midi and hz values
     #pitch_hz_o = pitch("specacf", win_s, hop_s, sampling_rate)
