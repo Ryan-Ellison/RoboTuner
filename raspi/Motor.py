@@ -40,7 +40,7 @@ def release_kits(all_but: int = -1):
 # moves motor based on tendency (i.e. forward if tendecy > 1, backward if tendecty < -1)
 # time_elapsed tells the motor how long to move based on how long it takes to get the tendencies
 def move_from_tendency(tendency: float = 0, time_elapsed: float = 0):
-	move_time = (time_elapsed - 0.025) * 1000
+	move_time = (time_elapsed - 0.025) * 100
 	
 	if tendency > 5:
 		for i in range(move_time):
@@ -69,7 +69,7 @@ def move_home():
 			
 			
 # moves the stepper motor up and down to signify its ready to play after powering on
-def startup_move()
+def startup_move():
 	for i in range(4):
 		for j in range(50):
 			current_step = push()
