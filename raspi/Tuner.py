@@ -10,6 +10,7 @@ This class measures the frequency of an audio sample
 """
 
 from aubio import source
+from aubio import pitch
 import Note
 from Note import Note
 import wave
@@ -46,7 +47,7 @@ def initialize_notes():
 # Be sure to initialize notes before calling it
 def tuner(audio_stream, sampling_rate, num_channels,
           frames_per_buffer, tolerance, sample_size):
-    from aubio import pitch
+
 
     # Window size of fft and size of hop
     win_s = 4096
@@ -68,7 +69,7 @@ def tuner(audio_stream, sampling_rate, num_channels,
     frames = []
 
     for i in range(0, int((sampling_rate / frames_per_buffer) * .2)):
-        data = audio_stream.read(frames_per_buffer)
+        data = audio_stream.read(frames_per_buffer, False)
         frames.append(data)
 
     a = wave.open('OUTPUT.wav', 'wb')

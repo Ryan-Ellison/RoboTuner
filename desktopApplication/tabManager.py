@@ -2,8 +2,9 @@ import sys
 from editSettingsPage import ProfileInputWindow
 from landingPage import LandingPage
 from cadFilesPage import CADFilesWindow
+from noteDisplayPage import NoteDisplayPage
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -16,16 +17,34 @@ class TabManager(QMainWindow):
 
         self.setWindowTitle("RoboTuner")
 
-        tabs = QTabWidget()
-        tabs.setTabPosition(QTabWidget.TabPosition.North)
-        tabs.setMovable(True)
-        tabs.setDocumentMode(True)
+        self.tabs = QTabWidget()
+        self.tabs.setTabPosition(QTabWidget.TabPosition.North)
+        self.tabs.setMovable(False)
+        self.tabs.setDocumentMode(True)
 
-        tabs.addTab(LandingPage(), "Landing Page")
-        tabs.addTab(ProfileInputWindow(), "Edit settings")
-        tabs.addTab(CADFilesWindow(), "CAD Files")
+        self.landingPage = LandingPage()
+        self.profileInputWindow = ProfileInputWindow()
+        self.cadFilesWindow = CADFilesWindow()
+        self.noteDiplayPage = NoteDisplayPage()
 
-        self.setCentralWidget(tabs)
+        self.timer = QTimer(self)
+
+        self.tabs.addTab(self.landingPage, "Landing Page")
+        self.tabs.addTab(self.profileInputWindow, "Edit settings")
+        self.tabs.addTab(self.cadFilesWindow, "CAD Files")
+        self.tabs.addTab(self.noteDiplayPage, "Display Note")
+
+        self.tabs.tabBarClicked.connect(self.tabSelected)
+
+        self.setCentralWidget(self.tabs)
+    
+    def tabSelected(self):
+        if self.tabs.currentIndex() == 3:
+            self.timer.setSingleShot(False)
+            self.timer.timeout.connect(self.noteDiplayPage.callPitch)
+            self.timer.start(200)
+        else:
+            self.timer.setSingleShot(True)
 
 app = QApplication(sys.argv)
 
