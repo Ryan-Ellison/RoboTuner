@@ -49,6 +49,7 @@ def initialize_notes():
 def tuner(audio_stream, sampling_rate, num_channels,
           frames_per_buffer, tolerance, sample_size):
 
+
     # Window size of fft and size of hop
     win_s = 2048
     hop_s = 512
@@ -67,7 +68,7 @@ def tuner(audio_stream, sampling_rate, num_channels,
     # Read audio into a buffer
     frames = []
     for i in range(0, int((sampling_rate / frames_per_buffer) * .2)):
-        data = audio_stream.read(frames_per_buffer)
+        data = audio_stream.read(frames_per_buffer, False)
         frames.append(data)
 
     a = wave.open('OUTPUT.wav', 'wb')
