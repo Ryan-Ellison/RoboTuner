@@ -2,15 +2,14 @@
 Tuner
 Adam Davis
 RoboTune
-Last edited 10/8/2023
+Last edited 10/18/2023
 
 =====================
 This class measures the frequency of an audio sample
 
 """
-
+from aubio import pitch
 from aubio import source
-import pyaudio
 import Note
 from Note import Note
 import wave
@@ -19,8 +18,8 @@ import wave
 # Creates a list of all notes
 def initialize_notes():
 
-    NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
-    OCTAVES = [1, 2, 3, 4, 5, 6, 7, 8]
+    note_names = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+    octaves = [1, 2, 3, 4, 5, 6, 7, 8]
     notes = []
 
     # midi value and frequency of C1, the first inputted note
@@ -29,14 +28,15 @@ def initialize_notes():
 
     # semitone multiplied by the 12th root of 2 is next semitone
     # 12th root of 2 = 1.0594630943593
-    MULTIPLIER = 1.0594630943593
+    multiplier = 1.0594630943593
 
-    for i in OCTAVES:
-        for j in NOTE_NAMES:
+    for i in octaves:
+        for j in note_names:
             note = Note(j + str(i), frequency, midi)
             notes.append(note)
             midi += 1
-            frequency *= MULTIPLIER
+            frequency *= multiplier
+
     for i in notes:
         i.print_note()
 
@@ -45,9 +45,9 @@ def initialize_notes():
 
 # Finds the frequency of current audio sample
 # Be sure to initialize notes before calling it
+
 def tuner(audio_stream, sampling_rate, num_channels,
           frames_per_buffer, tolerance, sample_size):
-    from aubio import pitch
 
     # Window size of fft and size of hop
     win_s = 2048
@@ -55,9 +55,6 @@ def tuner(audio_stream, sampling_rate, num_channels,
 
 
     # Computes midi and hz values
-    #pitch_hz_o = pitch("specacf", win_s, hop_s, sampling_rate)
-    #pitch_midi_o = pitch("specacf", win_s, hop_s, sampling_rate)
-
     pitch_hz_o = pitch("yin", win_s, hop_s, sampling_rate)
     pitch_midi_o = pitch("yin", win_s, hop_s, sampling_rate)
 
@@ -67,8 +64,8 @@ def tuner(audio_stream, sampling_rate, num_channels,
     pitch_midi_o.set_unit("midi")
     pitch_midi_o.set_tolerance(tolerance)
 
+    # Read audio into a buffer
     frames = []
-
     for i in range(0, int((sampling_rate / frames_per_buffer) * .2)):
         data = audio_stream.read(frames_per_buffer)
         frames.append(data)
@@ -80,16 +77,17 @@ def tuner(audio_stream, sampling_rate, num_channels,
     a.writeframesraw(b''.join(frames))
     a.close()
 
-    FILE = 'OUTPUT.wav'
+    # Create or replace output file
+    file = 'OUTPUT.wav'
 
-    s = source(FILE, sampling_rate, hop_s)
+    s = source(file, sampling_rate, hop_s)
 
+    # Initialize lists
     pitches_hz = []
     pitches_midi = []
     confidences = []
 
     total_frames = 0
-
     while True:
         samples, read = s()
         pitch_hz = pitch_hz_o(samples)[0]
