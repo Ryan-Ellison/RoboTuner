@@ -9,7 +9,7 @@ CS307 Group 14 RoboTuner
     For creating desktop application
 
 # Desktop App Generating Command
-1. RoboTuner % pyinstaller -F -w \--onefile \
+1. pyinstaller -F -w \--onefile \
 --hidden-import='aubio' \
 --hidden-import='wave' \
 desktopApplication/tabManager.py

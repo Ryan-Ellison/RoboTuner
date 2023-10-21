@@ -39,10 +39,7 @@ class NoteReader():
     def getNote(self):
         # Take in an audio sample each iteration and print musical note value and cents sharp
         # Used for tracking how long each note is played
-        i = 0
-        while i < 5:
-            print(i)
-            i += 1
+        while True:
             start = time.time()
             pitch = tuner(self.audio_stream, self.SAMPLING_RATE, self.NUM_CHANNELS,
                           self.FRAMES_PER_BUFFER, self.TOLERANCE, self.p.get_sample_size(self.FORMAT))
