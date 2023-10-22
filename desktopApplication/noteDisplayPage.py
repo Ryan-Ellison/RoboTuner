@@ -22,22 +22,27 @@ from PyQt6.QtWidgets import (
     QInputDialog, 
     QDialog, 
     QDialogButtonBox, 
-    QVBoxLayout
+    QVBoxLayout,
+    QHBoxLayout
+)
+from pyqtgraph import (
+    PlotWidget,
+    PlotItem,
+    mkPen
 )
 
 class Worker(QObject):
     finished = pyqtSignal()
-    progress = pyqtSignal(str)
+    progress = pyqtSignal(str, int)
     noteReader = NoteReader()
     note = "~"
 
     def run(self):
         while True:
-            note = self.noteReader.getNote()
-            print(note)
+            note, tendency = self.noteReader.getNote()
             if note is not None:
                 self.note = note
-                self.progress.emit(note)
+                self.progress.emit(note, tendency)
                 time.sleep(0.1)
 
 
@@ -59,13 +64,31 @@ class NoteDisplayPage(QMainWindow):
             lambda: self.label.setText("Play a note")
         )
 
-        self.setCentralWidget(self.label)
+        self.graphWidget = PlotWidget()
+        self.times = [0]
+        self.tendencies = [0]
+        self.graphWidget.setBackground('w')
+
+        pen = mkPen(color = (255, 0, 0))
+        self.dataLine = self.graphWidget.plot(self.times, self.tendencies, pen)
+
+        layout = QHBoxLayout()
+        layout.addWidget(self.label)
+        layout.addWidget(self.graphWidget)
+        container = QWidget()
+        container.setLayout(layout)
+        self.setCentralWidget(container)
 
         self.thread.start()
 
-    def reportNote(self, note):
-        print("called", note)
+    def reportNote(self, note, tendency):
+        print("called", note, tendency)
         self.label.setText(note)
+
+        self.times.append(self.times[-1] + 0.1)
+        self.tendencies.append(tendency)
+
+        self.dataLine.setData(self.times, self.tendencies)
 """
     def callPitch(self):
         note = self.noteReader.getNote()

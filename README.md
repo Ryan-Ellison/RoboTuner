@@ -5,6 +5,7 @@ CS307 Group 14 RoboTuner
 1. Python3
 2. PyQt6
     python3 -m pip install pyqt6
+    python3 -m pip install pyqtgraph
 3. pip install pyinstaller
     For creating desktop application
 

@@ -61,5 +61,5 @@ class NoteReader():
 
             # Use to slow down print statements for easier reading
             # time.sleep(0.5)
-            return nearest_note.name
+            return nearest_note.name, tendency
         return None
