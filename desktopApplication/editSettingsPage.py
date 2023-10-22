@@ -1,5 +1,5 @@
 import sys
-from profile import Profile
+from instrumentProfiles import InstrumentProfile
 from datetime import datetime
 from functools import cmp_to_key
 
@@ -149,7 +149,7 @@ class ProfileInputWindow(QMainWindow):
             if name in self.profiles.keys():
                 self.generateWarningDialog("Name Taken!", "This name is already in use.\nPlease choose another name.")
             else:
-                profile = Profile(name)
+                profile = InstrumentProfile(name)
                 self.profile = profile
                 self.profiles[name] = profile
                 self.populateDropdown()
@@ -182,7 +182,7 @@ class ProfileInputWindow(QMainWindow):
         if len(self.profiles) == 1:
             self.generateWarningDialog("Not Enough Profiles", "If you delete this profile there won't be any left.\nPlease create a new profile before deleting this one.")
         else:
-            self.profiles.pop(self.profile.name, Profile("-99"))
+            self.profiles.pop(self.profile.name, InstrumentProfile("-99"))
             if self.profileDropdown.itemText(0) == self.profile.name:
                 self.profile = self.profiles[self.profileDropdown.itemText(1)]
             else:
@@ -205,14 +205,14 @@ class ProfileInputWindow(QMainWindow):
     def loadProfiles(self):
         self.profiles = self.readProfilesFromFile()
         if len(self.profiles) == 0:
-            self.profile = Profile("Default")
+            self.profile = InstrumentProfile("Default")
             self.updateProfilesFiles()
         else:
             self.profile = self.profiles[list(self.profiles.keys())[0]]
         self.setTextBoxesToProfile()
 
     # Reads through the profile save file and constructs all profiles
-    def readProfilesFromFile(self, file="desktopApplication/.profiles.txt") -> dict[str, Profile]:
+    def readProfilesFromFile(self, file="desktopApplication/.profiles.txt") -> dict[str, InstrumentProfile]:
         profiles = dict()
         try:
             openFile = open(file, "r")
@@ -228,7 +228,7 @@ class ProfileInputWindow(QMainWindow):
                 slideSettings = [slideSettings[i].strip() for i in range(len(slideSettings))]
                 dateString = lines[i + 2].strip()
                 date = datetime.strptime(dateString, '%a %d %b %Y, %I:%M%p')
-                profile = Profile(name)
+                profile = InstrumentProfile(name)
                 profile.setValuesAndDate(slideSettings, date)
                 profiles[name] = profile
         finally:

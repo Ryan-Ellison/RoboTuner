@@ -1,6 +1,6 @@
 from datetime import datetime
 
-class Profile:
+class InstrumentProfile:
     
     def __init__(self, name, slideMaxLength=4, slideMinLength=0, slideMaxSpeed=4, slideMinSpeed=2) -> None:
         self.name = name
