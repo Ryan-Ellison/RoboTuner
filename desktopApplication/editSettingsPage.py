@@ -2,6 +2,8 @@ import sys
 from instrumentProfiles import InstrumentProfile
 from datetime import datetime
 from functools import cmp_to_key
+from pathlib import Path
+import shutil
 
 from PyQt6.QtWidgets import (
     QComboBox, 
@@ -14,7 +16,8 @@ from PyQt6.QtWidgets import (
     QInputDialog, 
     QDialog, 
     QDialogButtonBox, 
-    QVBoxLayout
+    QVBoxLayout,
+    QFileDialog
 )
 from PyQt6.QtGui import QIntValidator
 
@@ -34,6 +37,7 @@ class ProfileInputWindow(QMainWindow):
         self.renameProfileButton = QPushButton("Rename Current Profile")
         self.sortOrderButton = QPushButton("Sort By Date")
         self.sortByName = True
+        self.exportProfileButton = QPushButton("Export Profiles")
 
         # Link the button with created functions and toggle variable
         self.saveButton.clicked.connect(self.saveProfile)
@@ -43,6 +47,7 @@ class ProfileInputWindow(QMainWindow):
         self.renameProfileButton.clicked.connect(self.renameProfile)
         self.sortOrderButton.clicked.connect(self.swapSortOrder)
         self.sortOrderButton.setCheckable(True)
+        self.exportProfileButton.clicked.connect(self.exportProfiles)
         
 
         intRange = QIntValidator()
@@ -99,6 +104,7 @@ class ProfileInputWindow(QMainWindow):
         layout.addWidget(self.createProfileButton, 5, 0)
         layout.addWidget(self.deleteProfileButton, 5, 1)
         layout.addWidget(self.renameProfileButton, 5, 2)
+        layout.addWidget(self.exportProfileButton, 6, 0)
 
         # Utilize the layout as a widget
         container = QWidget()
@@ -107,6 +113,13 @@ class ProfileInputWindow(QMainWindow):
         # Place the layout in the app window
         self.setCentralWidget(container)
 
+    def exportProfiles(self):
+        homeDir = str(Path.home())
+        dname = QFileDialog.getExistingDirectory(self, "Export to:", homeDir)
+        profilesPath = str(Path(__file__).parent) + "/.profiles.txt"
+        shutil.copy2(profilesPath, dname)
+
+    # Swaps the sorting order and repopulates the dropdown
     def swapSortOrder(self, toggled):
         if toggled:
             self.sortOrderButton.setText("Sort By Name")
@@ -255,6 +268,7 @@ class ProfileInputWindow(QMainWindow):
         self.profileDropdown.setCurrentText(self.profile.name)
         self.setTextBoxesToProfile()
 
+    # Comparator function to allow sorting by date
     def orderByDate(self, profileName1, profileName2):
         profile1 = self.profiles[profileName1]
         profile2 = self.profiles[profileName2]
