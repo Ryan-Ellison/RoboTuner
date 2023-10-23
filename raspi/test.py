@@ -42,9 +42,25 @@ def led_off(x):
 
 #keyboard.on_release_key('w', print_step)
 #keyboard.on_release_key('s', print_step)
-keyboard.on_release_key('l', led_off)
+#keyboard.on_release_key('l', led_off)
 
 while True:
+	
+	GPIO.setmode(GPIO.BCM)
+	GPIO.setup(22, GPIO.OUT)
+	GPIO.output(22, GPIO.HIGH)
+	for i in range (250):
+		kits[current_kit].stepper1.onestep(direction=stepper.FORWARD, style=stepper_style)
+		time.sleep(sleep_time)
+	led_off(None)
+		
+	for i in range (250):
+		kits[current_kit].stepper1.onestep(direction=stepper.BACKWARD, style=stepper_style)
+		time.sleep(sleep_time)
+		
+	
+	
+	"""
 	if keyboard.is_pressed('1'):
 		sleep_time = 0.001
 		#current_kit = 0
@@ -96,7 +112,7 @@ while True:
 		break
 		
 	else:
-		release_kits(-1)
+		release_kits(-1)"""
 
 os.system("stty echo")
 termios.tcflush(sys.stdin, termios.TCIOFLUSH)
