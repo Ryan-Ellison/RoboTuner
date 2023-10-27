@@ -12,10 +12,15 @@ sends instructions to the tuner that tell it
 what to do
 
 """
+#import Motor as motor
 import pyaudio
 import statistics as stat
 import Tuner
 from Tuner import tuner
+import sys
+
+print(sys.path)
+
 
 
 # Initializes variables
@@ -32,6 +37,9 @@ notes = Tuner.initialize_notes()
 
 # Create PyAudio Object
 p = pyaudio.PyAudio()
+
+# where the stepper motor is
+current_step = 0
 
 
 # Audio Stream
@@ -88,7 +96,22 @@ while True:
 
     # Print detected note data
     print("Note = " + nearest_note.name + " Cents: " + str(tendency) +
-          " Average tendency " + str(nearest_note.get_tendency()) +
-          " Times Played: " + str(nearest_note.total_times_played))
+         " Average tendency " + str(nearest_note.get_tendency()) +
+         " Times Played: " + str(nearest_note.total_times_played))
 
+    if (tendency < 0):
+        # in the future, check to see if the slide is at its min or max length
+        #motor.pull()
+        #current_step -= 1  #is it one step per pull?
+        print("pull")
+        print(current_step)
+
+    elif (tendency > 0):
+        #motor.push()
+        current_step += 1
+        print("push")
+        print(current_step)
+
+    else:
+        continue;
 
