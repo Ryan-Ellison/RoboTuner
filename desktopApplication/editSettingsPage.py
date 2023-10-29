@@ -4,6 +4,7 @@ from datetime import datetime
 from functools import cmp_to_key
 from pathlib import Path
 import shutil
+import re
 
 from PyQt6.QtWidgets import (
     QComboBox, 
@@ -38,6 +39,7 @@ class ProfileInputWindow(QMainWindow):
         self.sortOrderButton = QPushButton("Sort By Date")
         self.sortByName = True
         self.exportProfileButton = QPushButton("Export Profiles")
+        self.importProfileButton = QPushButton("Import Profiles")
 
         # Link the button with created functions and toggle variable
         self.saveButton.clicked.connect(self.saveProfile)
@@ -48,6 +50,7 @@ class ProfileInputWindow(QMainWindow):
         self.sortOrderButton.clicked.connect(self.swapSortOrder)
         self.sortOrderButton.setCheckable(True)
         self.exportProfileButton.clicked.connect(self.exportProfiles)
+        self.importProfileButton.clicked.connect(self.importProfiles)
         
 
         intRange = QIntValidator()
@@ -105,6 +108,7 @@ class ProfileInputWindow(QMainWindow):
         layout.addWidget(self.deleteProfileButton, 5, 1)
         layout.addWidget(self.renameProfileButton, 5, 2)
         layout.addWidget(self.exportProfileButton, 6, 0)
+        layout.addWidget(self.importProfileButton, 6, 1)
 
         # Utilize the layout as a widget
         container = QWidget()
@@ -113,6 +117,45 @@ class ProfileInputWindow(QMainWindow):
         # Place the layout in the app window
         self.setCentralWidget(container)
 
+    # Imports profiles
+    def importProfiles(self):
+        homeDir = str(Path.home())
+        fname = QFileDialog.getOpenFileName(self, "Import from:", homeDir)[0]
+        if fname == '':
+            return
+        file = open(file=fname, mode="r")
+
+        if not self.verifyProfileFile(file):
+            self.generateWarningDialog("Invalid File", "Invalid file.\nPlease choose another file.")
+            return
+        newProfiles = self.readProfilesFromFile(fname)
+        for profile in newProfiles.keys():
+            if profile in self.profiles.keys():
+                continue
+            self.profiles[profile] = newProfiles[profile]
+
+        self.updateProfilesFiles()
+        self.loadProfiles()
+        file.close()
+    
+    # Verifies the shared file contains profile data with valid formatting
+    def verifyProfileFile(self, file):
+        namePattern = r"^.+$"
+        settingsPattern = r'^(\d+,){3}\d+\n$'
+        datePattern = r"^(\d{1,2}/){2}\d{2} (\d{2}:){2}\d{2}(\n)?$"
+        lines = file.readlines()
+        for i in range(0, len(lines), 3):
+            nameMatch = re.findall(namePattern, lines[i])
+            settingsMatch = re.match(settingsPattern, str(lines[i + 1]))
+            dateMatch = re.match(datePattern, lines[i + 2])
+            if not (nameMatch and settingsMatch and dateMatch):
+                print(lines[i], nameMatch)
+                print(lines[i + 1], settingsMatch)
+                print(lines[i + 2], dateMatch)
+                return False
+        return True
+
+    # Exports the profiles file to target location
     def exportProfiles(self):
         homeDir = str(Path.home())
         dname = QFileDialog.getExistingDirectory(self, "Export to:", homeDir)
@@ -240,7 +283,7 @@ class ProfileInputWindow(QMainWindow):
                 slideSettings = lines[i + 1].split(',')
                 slideSettings = [slideSettings[i].strip() for i in range(len(slideSettings))]
                 dateString = lines[i + 2].strip()
-                date = datetime.strptime(dateString, '%a %d %b %Y, %I:%M%p')
+                date = datetime.strptime(dateString, '%d/%m/%y %H:%M:%S')
                 profile = InstrumentProfile(name)
                 profile.setValuesAndDate(slideSettings, date)
                 profiles[name] = profile

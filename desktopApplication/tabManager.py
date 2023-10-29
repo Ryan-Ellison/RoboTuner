@@ -26,14 +26,14 @@ class TabManager(QMainWindow):
         self.landingPage = LandingPage()
         self.profileInputWindow = ProfileInputWindow()
         self.cadFilesWindow = CADFilesWindow()
-        self.noteDiplayPage = NoteDisplayPage()
+       # self.noteDiplayPage = NoteDisplayPage()
 
         # self.timer = QTimer(self)
 
         self.tabs.addTab(self.landingPage, "Landing Page")
         self.tabs.addTab(self.profileInputWindow, "Edit settings")
         self.tabs.addTab(self.cadFilesWindow, "CAD Files")
-        self.tabs.addTab(self.noteDiplayPage, "Display Note")
+        #self.tabs.addTab(self.noteDiplayPage, "Display Note")
 
         # self.tabs.tabBarClicked.connect(self.tabSelected)
 

@@ -65,11 +65,13 @@ class NoteDisplayPage(QMainWindow):
         )
 
         self.graphWidget = PlotWidget()
+        self.graphWidget.setYRange(-50, 50, padding=0.15)
         self.times = [0]
         self.tendencies = [0]
         self.graphWidget.setBackground('w')
 
-        pen = mkPen(color = (255, 0, 0))
+        pen = mkPen(color = (255, 255, 255), width = 100000)
+
         self.dataLine = self.graphWidget.plot(self.times, self.tendencies, pen)
 
         layout = QHBoxLayout()

@@ -33,7 +33,7 @@ class InstrumentProfile:
             text += value
             text += ','
         text = text[:len(text) - 1] + "\n"
-        text += self.dateEdited.strftime('%a %d %b %Y, %I:%M%p') + "\n"
+        text += self.dateEdited.strftime('%d/%m/%y %H:%M:%S') + "\n"
         return text
     
     
