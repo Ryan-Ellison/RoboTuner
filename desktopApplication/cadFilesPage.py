@@ -1,5 +1,6 @@
 import sys
 import shutil
+from pathlib import Path
 from PyQt6.QtCore import (
     QDir,
     QCoreApplication,
@@ -33,8 +34,7 @@ class CADFilesWindow(QMainWindow):
         self.fileListView = QListView()
         self.fileBrowserView = QTreeView()
 
-        # 
-        self.cadPath = QDir("desktopApplication/CADFiles/").absolutePath() + "/"
+        self.cadPath = QDir(str(Path(__file__).parent) + "/CADFiles/").absolutePath() + "/"
         self.fileModel = QFileSystemModel()
         self.fileModel.setRootPath(self.cadPath)
 

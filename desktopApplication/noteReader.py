@@ -1,7 +1,11 @@
 
 import time
 import sys
-sys.path.insert(0, "/Users/ryanellison/VSCode Projects/RoboTuner/raspi")
+
+from pathlib import Path
+pyaudioPath = str(Path(__file__).parent.parent) + "/raspi"
+print(pyaudioPath)
+sys.path.insert(0, pyaudioPath)
 import pyaudio
 import statistics as stat
 import Tuner

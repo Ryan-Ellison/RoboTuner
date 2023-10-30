@@ -5,7 +5,6 @@ from landingPage import LandingPage
 from cadFilesPage import CADFilesWindow
 from noteDisplayPage import NoteDisplayPage
 
-from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,

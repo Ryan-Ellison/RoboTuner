@@ -1,5 +1,5 @@
 import sys
-from profile import Profile
+from instrumentProfiles import InstrumentProfile
 from datetime import datetime
 from functools import cmp_to_key
 from noteReader import NoteReader
@@ -84,7 +84,6 @@ class NoteDisplayPage(QMainWindow):
         self.thread.start()
 
     def reportNote(self, note, tendency):
-        print("called", note, tendency)
         self.label.setText(note)
 
         self.times.append(self.times[-1] + 0.1)
