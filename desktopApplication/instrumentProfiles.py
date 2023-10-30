@@ -1,6 +1,6 @@
 from datetime import datetime
 
-class Profile:
+class InstrumentProfile:
     
     def __init__(self, name, slideMaxLength=4, slideMinLength=0, slideMaxSpeed=4, slideMinSpeed=2) -> None:
         self.name = name
@@ -33,7 +33,7 @@ class Profile:
             text += value
             text += ','
         text = text[:len(text) - 1] + "\n"
-        text += self.dateEdited.strftime('%a %d %b %Y, %I:%M%p') + "\n"
+        text += self.dateEdited.strftime('%d/%m/%y %H:%M:%S') + "\n"
         return text
     
     

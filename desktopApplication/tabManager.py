@@ -5,7 +5,6 @@ from landingPage import LandingPage
 from cadFilesPage import CADFilesWindow
 from noteDisplayPage import NoteDisplayPage
 
-from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -26,19 +25,20 @@ class TabManager(QMainWindow):
         self.landingPage = LandingPage()
         self.profileInputWindow = ProfileInputWindow()
         self.cadFilesWindow = CADFilesWindow()
-        self.noteDiplayPage = NoteDisplayPage()
+       # self.noteDiplayPage = NoteDisplayPage()
 
-        self.timer = QTimer(self)
+        # self.timer = QTimer(self)
 
         self.tabs.addTab(self.landingPage, "Landing Page")
         self.tabs.addTab(self.profileInputWindow, "Edit settings")
         self.tabs.addTab(self.cadFilesWindow, "CAD Files")
-        self.tabs.addTab(self.noteDiplayPage, "Display Note")
+        #self.tabs.addTab(self.noteDiplayPage, "Display Note")
 
-        self.tabs.tabBarClicked.connect(self.tabSelected)
+        # self.tabs.tabBarClicked.connect(self.tabSelected)
 
         self.setCentralWidget(self.tabs)
     
+    """
     def tabSelected(self):
         if self.tabs.currentIndex() == 3:
             self.timer.setSingleShot(False)
@@ -46,6 +46,7 @@ class TabManager(QMainWindow):
             self.timer.start(200)
         else:
             self.timer.setSingleShot(True)
+    """
 
 PATH = "/Users/ryanellison/VSCode Projects/RoboTuner/"
 

@@ -1,7 +1,10 @@
 import sys
-from profile import Profile
+from instrumentProfiles import InstrumentProfile
 from datetime import datetime
 from functools import cmp_to_key
+from pathlib import Path
+import shutil
+import re
 
 from PyQt6.QtWidgets import (
     QComboBox, 
@@ -14,7 +17,8 @@ from PyQt6.QtWidgets import (
     QInputDialog, 
     QDialog, 
     QDialogButtonBox, 
-    QVBoxLayout
+    QVBoxLayout,
+    QFileDialog
 )
 from PyQt6.QtGui import QIntValidator
 
@@ -34,6 +38,8 @@ class ProfileInputWindow(QMainWindow):
         self.renameProfileButton = QPushButton("Rename Current Profile")
         self.sortOrderButton = QPushButton("Sort By Date")
         self.sortByName = True
+        self.exportProfileButton = QPushButton("Export Profiles")
+        self.importProfileButton = QPushButton("Import Profiles")
 
         # Link the button with created functions and toggle variable
         self.saveButton.clicked.connect(self.saveProfile)
@@ -43,6 +49,8 @@ class ProfileInputWindow(QMainWindow):
         self.renameProfileButton.clicked.connect(self.renameProfile)
         self.sortOrderButton.clicked.connect(self.swapSortOrder)
         self.sortOrderButton.setCheckable(True)
+        self.exportProfileButton.clicked.connect(self.exportProfiles)
+        self.importProfileButton.clicked.connect(self.importProfiles)
         
 
         intRange = QIntValidator()
@@ -99,6 +107,8 @@ class ProfileInputWindow(QMainWindow):
         layout.addWidget(self.createProfileButton, 5, 0)
         layout.addWidget(self.deleteProfileButton, 5, 1)
         layout.addWidget(self.renameProfileButton, 5, 2)
+        layout.addWidget(self.exportProfileButton, 6, 0)
+        layout.addWidget(self.importProfileButton, 6, 1)
 
         # Utilize the layout as a widget
         container = QWidget()
@@ -107,6 +117,52 @@ class ProfileInputWindow(QMainWindow):
         # Place the layout in the app window
         self.setCentralWidget(container)
 
+    # Imports profiles
+    def importProfiles(self):
+        homeDir = str(Path.home())
+        fname = QFileDialog.getOpenFileName(self, "Import from:", homeDir)[0]
+        if fname == '':
+            return
+        file = open(file=fname, mode="r")
+
+        if not self.verifyProfileFile(file):
+            self.generateWarningDialog("Invalid File", "Invalid file.\nPlease choose another file.")
+            return
+        newProfiles = self.readProfilesFromFile(fname)
+        for profile in newProfiles.keys():
+            if profile in self.profiles.keys():
+                continue
+            self.profiles[profile] = newProfiles[profile]
+
+        self.updateProfilesFiles()
+        self.loadProfiles()
+        file.close()
+    
+    # Verifies the shared file contains profile data with valid formatting
+    def verifyProfileFile(self, file):
+        namePattern = r"^.+$"
+        settingsPattern = r'^(\d+,){3}\d+\n$'
+        datePattern = r"^(\d{1,2}/){2}\d{2} (\d{2}:){2}\d{2}(\n)?$"
+        lines = file.readlines()
+        for i in range(0, len(lines), 3):
+            nameMatch = re.findall(namePattern, lines[i])
+            settingsMatch = re.match(settingsPattern, str(lines[i + 1]))
+            dateMatch = re.match(datePattern, lines[i + 2])
+            if not (nameMatch and settingsMatch and dateMatch):
+                print(lines[i], nameMatch)
+                print(lines[i + 1], settingsMatch)
+                print(lines[i + 2], dateMatch)
+                return False
+        return True
+
+    # Exports the profiles file to target location
+    def exportProfiles(self):
+        homeDir = str(Path.home())
+        dname = QFileDialog.getExistingDirectory(self, "Export to:", homeDir)
+        profilesPath = str(Path(__file__).parent) + "/.profiles.txt"
+        shutil.copy2(profilesPath, dname)
+
+    # Swaps the sorting order and repopulates the dropdown
     def swapSortOrder(self, toggled):
         if toggled:
             self.sortOrderButton.setText("Sort By Name")
@@ -149,7 +205,7 @@ class ProfileInputWindow(QMainWindow):
             if name in self.profiles.keys():
                 self.generateWarningDialog("Name Taken!", "This name is already in use.\nPlease choose another name.")
             else:
-                profile = Profile(name)
+                profile = InstrumentProfile(name)
                 self.profile = profile
                 self.profiles[name] = profile
                 self.populateDropdown()
@@ -182,7 +238,7 @@ class ProfileInputWindow(QMainWindow):
         if len(self.profiles) == 1:
             self.generateWarningDialog("Not Enough Profiles", "If you delete this profile there won't be any left.\nPlease create a new profile before deleting this one.")
         else:
-            self.profiles.pop(self.profile.name, Profile("-99"))
+            self.profiles.pop(self.profile.name, InstrumentProfile("-99"))
             if self.profileDropdown.itemText(0) == self.profile.name:
                 self.profile = self.profiles[self.profileDropdown.itemText(1)]
             else:
@@ -205,14 +261,14 @@ class ProfileInputWindow(QMainWindow):
     def loadProfiles(self):
         self.profiles = self.readProfilesFromFile()
         if len(self.profiles) == 0:
-            self.profile = Profile("Default")
+            self.profile = InstrumentProfile("Default")
             self.updateProfilesFiles()
         else:
             self.profile = self.profiles[list(self.profiles.keys())[0]]
         self.setTextBoxesToProfile()
 
     # Reads through the profile save file and constructs all profiles
-    def readProfilesFromFile(self, file="desktopApplication/.profiles.txt") -> dict[str, Profile]:
+    def readProfilesFromFile(self, file="desktopApplication/.profiles.txt") -> dict[str, InstrumentProfile]:
         profiles = dict()
         try:
             openFile = open(file, "r")
@@ -227,8 +283,8 @@ class ProfileInputWindow(QMainWindow):
                 slideSettings = lines[i + 1].split(',')
                 slideSettings = [slideSettings[i].strip() for i in range(len(slideSettings))]
                 dateString = lines[i + 2].strip()
-                date = datetime.strptime(dateString, '%a %d %b %Y, %I:%M%p')
-                profile = Profile(name)
+                date = datetime.strptime(dateString, '%d/%m/%y %H:%M:%S')
+                profile = InstrumentProfile(name)
                 profile.setValuesAndDate(slideSettings, date)
                 profiles[name] = profile
         finally:
@@ -255,6 +311,7 @@ class ProfileInputWindow(QMainWindow):
         self.profileDropdown.setCurrentText(self.profile.name)
         self.setTextBoxesToProfile()
 
+    # Comparator function to allow sorting by date
     def orderByDate(self, profileName1, profileName2):
         profile1 = self.profiles[profileName1]
         profile2 = self.profiles[profileName2]
