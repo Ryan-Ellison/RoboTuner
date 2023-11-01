@@ -4,6 +4,7 @@ from editSettingsPage import ProfileInputWindow
 from landingPage import LandingPage
 from cadFilesPage import CADFilesWindow
 from noteDisplayPage import NoteDisplayPage
+from hardwareSpecificationsPage import HardwareSpecificationsPage
 
 from PyQt6.QtWidgets import (
     QApplication,
@@ -25,14 +26,16 @@ class TabManager(QMainWindow):
         self.landingPage = LandingPage()
         self.profileInputWindow = ProfileInputWindow()
         self.cadFilesWindow = CADFilesWindow()
-       # self.noteDiplayPage = NoteDisplayPage()
+        self.noteDiplayPage = NoteDisplayPage()
+        self.hardwareSpecificationsPage = HardwareSpecificationsPage()
 
         # self.timer = QTimer(self)
 
         self.tabs.addTab(self.landingPage, "Landing Page")
         self.tabs.addTab(self.profileInputWindow, "Edit settings")
         self.tabs.addTab(self.cadFilesWindow, "CAD Files")
-        #self.tabs.addTab(self.noteDiplayPage, "Display Note")
+        self.tabs.addTab(self.noteDiplayPage, "Display Note")
+        self.tabs.addTab(self.hardwareSpecificationsPage, "Hardware Specifications")
 
         # self.tabs.tabBarClicked.connect(self.tabSelected)
 
