@@ -1,3 +1,4 @@
+'''
 from TMC_2209.TMC_2209_StepperDriver import *
 import time
 
@@ -31,3 +32,41 @@ success = tmc.run_to_position_steps(-10000, MovementAbsRel.RELATIVE)
 print(tmc.get_steps_per_revolution())
 
 tmc.set_motor_enabled(False)
+'''
+from Motor import Motor
+import os
+
+os.system("stty -echo")
+
+motor = Motor(100)
+pos = None
+
+print("'w':	push\n's':	pull")
+while True:
+	key = input("")
+	if key == 'w':
+		motor.push(10)
+		print("push")
+		
+	if key == 's':
+		motor.pull(10)
+		print("pull")
+		
+	if key == '1':
+		motor.led_R()
+		
+	if key == '2':
+		motor.led_G()
+		
+	if key == '3':
+		motor.led_B()
+		
+	if key == 'o':
+		motor.led_Off()
+		
+	if (pos != motor.get_position()):
+		pos = motor.get_position()
+		print(pos)
+
+os.system("stty echo")
+termios.tcflush(sys.stdin, termios.TCIOFLUSH)
