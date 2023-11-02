@@ -44,8 +44,6 @@ class TuningTendencyWindow(QMainWindow):
             count_i += 1
             count_j = 0
 
-        label = QL
-
         container = QWidget()
         container.setLayout(layout)
         self.setCentralWidget(container)
