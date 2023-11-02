@@ -51,10 +51,10 @@ class TabManager(QMainWindow):
             self.timer.setSingleShot(True)
     """
 
-PATH = "/Users/ryanellison/VSCode Projects/RoboTuner/"
+# PATH = "/Users/ryanellison/VSCode Projects/RoboTuner/"
 
-sys.path.insert(0, PATH)
-os.chdir(PATH)
+# sys.path.insert(0, PATH)
+# os.chdir(PATH)
 
 app = QApplication(sys.argv)
 

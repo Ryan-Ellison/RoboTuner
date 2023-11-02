@@ -18,9 +18,10 @@ from PyQt6.QtWidgets import (
     QDialog, 
     QDialogButtonBox, 
     QVBoxLayout,
-    QFileDialog
+    QFileDialog,
 )
 from PyQt6.QtGui import QIntValidator
+from PyQt6.QtCore import QDir
 
 # Subclass QMainWindow to customize application's profile setting menu
 class ProfileInputWindow(QMainWindow):
@@ -259,7 +260,8 @@ class ProfileInputWindow(QMainWindow):
         
     # Loads the first profile if there are any already made, otherwise makes a default
     def loadProfiles(self):
-        self.profiles = self.readProfilesFromFile()
+        defaultProfilesPath = str(Path(__file__).parent) + "/.profiles.txt"
+        self.profiles = self.readProfilesFromFile(defaultProfilesPath)
         if len(self.profiles) == 0:
             self.profile = InstrumentProfile("Default")
             self.updateProfilesFiles()
@@ -268,7 +270,7 @@ class ProfileInputWindow(QMainWindow):
         self.setTextBoxesToProfile()
 
     # Reads through the profile save file and constructs all profiles
-    def readProfilesFromFile(self, file="desktopApplication/.profiles.txt") -> dict[str, InstrumentProfile]:
+    def readProfilesFromFile(self, file=str(Path(__file__).parent) + "/.profiles.txt") -> dict[str, InstrumentProfile]:
         profiles = dict()
         try:
             openFile = open(file, "r")
@@ -292,7 +294,7 @@ class ProfileInputWindow(QMainWindow):
             return profiles
 
     # Writes all existing profiles to the save file
-    def updateProfilesFiles(self, file="desktopApplication/.profiles.txt"):
+    def updateProfilesFiles(self, file=str(Path(__file__).parent) + "/.profiles.txt"):
         openFile = open(file, "w")
         for profileName in sorted(list(self.profiles.keys()), key=lambda s: s.casefold()):
             profile = self.profiles[profileName]
