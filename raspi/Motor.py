@@ -40,6 +40,8 @@ class Motor:
 		
 	def deinit(_):
 		_.tmc.set_motor_enabled(False)
+		for color, pin in _.pins.items():
+			GPIO.cleanup(pin)
 
 	def mm_to_steps(_, mm):
 		return int(mm/0.04*_.ms_res*0.95)

@@ -14,11 +14,12 @@ def random_movement(hrs=3, log_min=5):
 		else:
 			motor.pull(rand.random()*9 + 1)
 			
-		if (round(t_dif % (60 * log_min)) == 0 && t_dif/60 > log_min/2):
+		if (round(t_dif % (60 * log_min)) == 0 and t_dif/60 > log_min/2):
 			f.write(f"Still on and working at {t_dif/60} minutes\n")
 			time.sleep(0.1)
 	
+	f.write(f"\nCompleted Battery Life Testing at {t_dif/60} minutes\n")
 	f.close()
 	
 if __name__ == "__main__":
-	random_movement(1/60, 0.5)
+	random_movement(1/30, 0.5)
