@@ -1,7 +1,3 @@
-import sys
-from instrumentProfiles import InstrumentProfile
-from datetime import datetime
-from functools import cmp_to_key
 from noteReader import NoteReader
 import time
 
