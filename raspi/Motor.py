@@ -1,98 +1,111 @@
+from TMC_2209.TMC_2209_StepperDriver import *
 import time
-import board
-from adafruit_motorkit import MotorKit
-from adafruit_motor import stepper
 import RPi.GPIO as GPIO
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(22, GPIO.OUT)
+class Motor:
+	tmc = None
+	max_dist = 100
+	max_accel = 1000
+	max_speed = 250
 
-kit2 = MotorKit(i2c=board.I2C(), steppers_microsteps=2)
-kit4 = MotorKit(i2c=board.I2C(), steppers_microsteps=4)
-kit8 = MotorKit(i2c=board.I2C(), steppers_microsteps=8)
-kit16 = MotorKit(i2c=board.I2C(), steppers_microsteps=16)
-
-stepper_style = stepper.MICROSTEP
-current_step = 0
-
-prev_tendency = 0
-total_elapsed_time = 0
-
-
-# move motor to push tuning slide out
-def push():
-	return kit4.stepper1.onestep(direction=stepper.FORWARD, style=stepper_style)
-	
-	
-# move motor to pull tuning slide in
-def pull():
-	return kit4.stepper1.onestep(direction=stepper.BACKWARD, style=stepper_style)
-
-
-# releases stepper motor in all kits to ensure it does not use power when it shouldn't
-# all_but argument allows for a single exeption so one kit can continue running
-def release_kits(all_but: int = -1):
-	for i in range(4):
-		if i != x:
-			kits[i].stepper1.release()
-			
-
-# moves motor based on tendency (i.e. forward if tendecy > 1, backward if tendecty < -1)
-# time_elapsed tells the motor how long to move based on how long it takes to get the tendencies
-def move_from_tendency(tendency: float = 0, time_elapsed: float = 0):
-	move_time = (time_elapsed - 0.025) * 100
-	
-	if tendency > 5:
-		for i in range(move_time):
-			current_step = push()
-			time.sleep(0.001)
+	def __init__(_, max_dist=100, speed=250, accel=1000, en_pin=21, step_pin=16, dir_pin=20, stall_pin=26, ms_res=2):
+		_.max_dist = max_dist
+		_.max_accel = accel
+		_.max_speed = speed
+		_.ms_res = ms_res
 		
-	if tendency < -5:
-		for i in range(move_time):
-			current_step = pull()
-			time.sleep(0.001)
-			
-	release_kits()
-			
-
-# moves the motor to the home position (currently this is whatever position it started in)
-def move_home():
-	if current_step > 0:
-		while not (current_step < 5 and current_step > -5):
-			current_step = pull()
-			
-	if current_step < 0:
-		while not (current_step < 5 and current_step > -5):
-			current_step = push()
-			
-	release_kits()
-			
-			
-# moves the stepper motor up and down to signify its ready to play after powering on
-def startup_move():
-	for i in range(4):
-		for j in range(50):
-			current_step = push()
+		_.tmc = TMC_2209(en_pin, step_pin, dir_pin)
+		_.tmc.set_movement_abs_rel(MovementAbsRel.RELATIVE)
+		_.tmc.set_direction_reg(False)
+		_.tmc.set_current(300)
+		_.tmc.set_interpolation(True)
+		_.tmc.set_spreadcycle(False)
+		_.tmc.set_microstepping_resolution(ms_res)
+		_.tmc.set_internal_rsense(False)
+		_.tmc.set_stallguard_callback(26, 50, _.stall_callback, 500)
+		_.tmc.set_motor_enabled(True)
+		_.tmc.set_acceleration(_.max_accel)
+		_.tmc.set_max_speed(_.max_speed)
+		_.tmc.set_current_position(0)
 		
-		for j in range(50):
-			current_step = pull()
-	
-	release_kits()
-
-
-# turns on LED if there is no movement (meaning high resistance) for a period of time
-def resistence_check(tendency: float = 0, time_elapsed: float = 0,
-						tend_threshold: float = 1, time_threshold: float = 2):
-	if (tendency - prev_tendency) < tend_threshold:
-		total_elapsed_time += time_elapsed
+		_.pins = {
+			"r": 5,
+			"g": 6,
+			"b": 13
+		}
+		GPIO.setmode(GPIO.BCM)
+		for color, pin in _.pins.items():
+			GPIO.setup(pin, GPIO.OUT)
+		_.led_Off()
 		
-	if total_elapsed_time > time_threshold:
-		GPIO.output(22, GPIO.HIGH)
-	
-	
+	def deinit(_):
+		_.tmc.set_motor_enabled(False)
+		for color, pin in _.pins.items():
+			GPIO.cleanup(pin)
 
+	def mm_to_steps(_, mm):
+		return int(mm/0.04*_.ms_res*0.95)
+		
+	def steps_to_mm(_, steps):
+		return steps/0.95/_.ms_res*0.04
 
+	def home(_):
+		_.tmc.run_to_position_steps(_.mm_to_steps(-_.max_dist))
 
-
-
-
+	def stall_callback(_, channel):
+		if (_.tmc.get_stallguard_result() != 0):
+			print("StallGuard!	:	", _.tmc.get_stallguard_result())
+			_.tmc.stop(stop_mode=StopMode.HARDSTOP)
+			_.led_R()
+			
+	def push(_, dist=1):
+		if (_.steps_to_mm(_.tmc.get_current_position()) + dist < _.max_dist):
+			_.tmc.run_to_position_steps(_.mm_to_steps(dist))
+		else:
+			_.tmc.run_to_position_steps(_.mm_to_steps(_.max_dist), MovementAbsRel.ABSOLUTE)
+			
+	def pull(_, dist=1):
+		if (_.steps_to_mm(_.tmc.get_current_position()) - dist > 0):
+			_.tmc.run_to_position_steps(_.mm_to_steps(-dist))
+		else:
+			_.tmc.run_to_position_steps(0, MovementAbsRel.ABSOLUTE)
+			
+	def stop(_):
+		_.tmc.stop(stop_mode=StopMode.HARDSTOP)
+			
+	def get_position(_):
+		return (_.steps_to_mm(_.tmc.get_current_position()), _.tmc.get_current_position())
+		
+	def get_speed(_):
+		return _.max_speed
+		
+	def set_speed(_, speed):
+		_.max_speed = speed
+		_.tmc.set_max_speed(_.max_speed)
+		
+	def get_accel(_):
+		return _.max_accel
+		
+	def set_accel(_, accel):
+		_.max_accel = accel
+		_.tmc.set_acceleration(_.max_accel)
+		
+	def led_R(_):
+		GPIO.output(_.pins["r"], GPIO.HIGH)
+		GPIO.output(_.pins["g"], GPIO.LOW)
+		GPIO.output(_.pins["b"], GPIO.LOW)
+		
+	def led_G(_):
+		GPIO.output(_.pins["r"], GPIO.LOW)
+		GPIO.output(_.pins["g"], GPIO.HIGH)
+		GPIO.output(_.pins["b"], GPIO.LOW)
+		
+	def led_B(_):
+		GPIO.output(_.pins["r"], GPIO.LOW)
+		GPIO.output(_.pins["g"], GPIO.LOW)
+		GPIO.output(_.pins["b"], GPIO.HIGH)
+		
+	def led_Off(_):
+		GPIO.output(_.pins["r"], GPIO.LOW)
+		GPIO.output(_.pins["g"], GPIO.LOW)
+		GPIO.output(_.pins["b"], GPIO.LOW)
