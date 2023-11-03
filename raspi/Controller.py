@@ -12,7 +12,8 @@ sends instructions to the tuner that tell it
 what to do
 
 """
-from Motor import Motor
+import Motor as motor
+import json
 import pyaudio
 import statistics as stat
 import Tuner
@@ -77,6 +78,16 @@ f.close()
 motor = Motor(max_dist)
 motor.set_speed(motor.mm_to_steps(max_speed))
 
+notesDict = {note.name:note.tendency for note in notes}
+
+file = open("notes.json", "w")
+
+json_format = json.dumps(notesDict, indent=4)
+
+for line in json_format:
+    file.write(line)
+
+file.close()
 # Create PyAudio Object
 p = pyaudio.PyAudio()
 
