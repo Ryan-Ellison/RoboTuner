@@ -1,8 +1,10 @@
 import sys
+import os
 from instrumentProfiles import InstrumentProfile
 from datetime import datetime
 from functools import cmp_to_key
 from pathlib import Path
+import paramiko
 import shutil
 import re
 
@@ -41,6 +43,7 @@ class ProfileInputWindow(QMainWindow):
         self.sortByName = True
         self.exportProfileButton = QPushButton("Export Profiles")
         self.importProfileButton = QPushButton("Import Profiles")
+        self.updateRaspberryPiButton = QPushButton("Update Raspberry Pi")
 
         # Link the button with created functions and toggle variable
         self.saveButton.clicked.connect(self.saveProfile)
@@ -52,7 +55,7 @@ class ProfileInputWindow(QMainWindow):
         self.sortOrderButton.setCheckable(True)
         self.exportProfileButton.clicked.connect(self.exportProfiles)
         self.importProfileButton.clicked.connect(self.importProfiles)
-        
+        self.updateRaspberryPiButton.clicked.connect(self.updateRaspberryPi)
 
         intRange = QIntValidator()
         intRange.setBottom(0)
@@ -110,6 +113,7 @@ class ProfileInputWindow(QMainWindow):
         layout.addWidget(self.renameProfileButton, 5, 2)
         layout.addWidget(self.exportProfileButton, 6, 0)
         layout.addWidget(self.importProfileButton, 6, 1)
+        layout.addWidget(self.updateRaspberryPiButton, 6, 2)
 
         # Utilize the layout as a widget
         container = QWidget()
@@ -117,6 +121,29 @@ class ProfileInputWindow(QMainWindow):
 
         # Place the layout in the app window
         self.setCentralWidget(container)
+
+    # Updates Raspberry Pi Settings
+    def updateRaspberryPi(self):
+        maxSlideLength = self.slideMaxLengthInput.text()
+        maxSlideSpeed = self.slideMaxSpeedInput.text()
+        settings = [maxSlideLength, "\n", maxSlideSpeed]
+        configFile = open("config.txt", "x")
+        configFile.writelines(settings)
+        configFile.close()
+        ssh = paramiko.SSHClient()
+        ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
+        ssh.connect("10.186.150.39", username="pi", password="raspberry")
+        sftp = ssh.open_sftp()
+        if os.path.isfile("config.txt"):
+            print("listing dir")
+            sftp.listdir(path="/..")
+            sftp.put("config.txt", "./config.txt")
+        else:
+            print("wtf")
+        sftp.close()
+        ssh.close()
+        os.remove("config.txt")
+
 
     # Imports profiles
     def importProfiles(self):
