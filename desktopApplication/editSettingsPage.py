@@ -65,6 +65,10 @@ class ProfileInputWindow(QMainWindow):
         intRange.setBottom(0)
         intRange.setTop(100)
 
+        self.maxSpeedRange = QIntValidator()
+        self.maxSpeedRange.setBottom(10)
+        self.maxSpeedRange.setTop(100)
+
         # Create a textbox and label for slide max length
         self.slideMaxLengthInput = QLineEdit()
         self.slideMaxLengthInput.setValidator(intRange)
@@ -79,7 +83,7 @@ class ProfileInputWindow(QMainWindow):
 
         # Create a textbox and label for slide max speed
         self.slideMaxSpeedInput = QLineEdit()
-        self.slideMaxSpeedInput.setValidator(intRange)
+        self.slideMaxSpeedInput.setValidator(self.maxSpeedRange)
         self.slideMaxSpeedLabel = QLabel()
         self.slideMaxSpeedLabel.setText("Max slide speed (mm/sec)")
 
@@ -184,11 +188,15 @@ class ProfileInputWindow(QMainWindow):
     def updateRaspberryPi(self):
         maxSlideLength = self.slideMaxLengthInput.text()
         maxSlideSpeed = self.slideMaxSpeedInput.text()
+        valid = self.maxSpeedRange.validate("30", 0)[0]
+        if self.maxSpeedRange.validate(maxSlideSpeed, 0)[0] != valid:
+            self.generateWarningDialog("Invalid max slide speed", "Slide speed must be between 10-100")
+            return
         settings = [maxSlideLength, "\n", maxSlideSpeed]
         ssh = paramiko.SSHClient()
         try:
             ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
-            ssh.connect("10.186.150.39", username="pi", password="raspberry")
+            ssh.connect("10.186.150.39", username="pi", password="raspberry", timeout=10)
         except:
             self.generateWarningDialog("Raspberry Pi not found", "Raspberry Pi not found")
             ssh.close()
