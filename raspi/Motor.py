@@ -1,15 +1,14 @@
 from TMC_2209.TMC_2209_StepperDriver import *
 import time
-import RPi.GPIO as GPIO
+from gpiozero import RGBLED
+
 
 class Motor:
 	tmc = None
-	max_dist = 100
-	max_accel = 1000
-	max_speed = 250
-
-	def __init__(_, max_dist=100, speed=250, accel=1000, en_pin=21, step_pin=16, dir_pin=20, stall_pin=26, ms_res=2):
+	
+	def __init__(_, max_dist=100, min_dist=0, speed=2000, accel=900, en_pin=21, step_pin=16, dir_pin=20, stall_pin=26, ms_res=2):
 		_.max_dist = max_dist
+		_.min_dist = min_dist
 		_.max_accel = accel
 		_.max_speed = speed
 		_.ms_res = ms_res
@@ -26,22 +25,16 @@ class Motor:
 		_.tmc.set_motor_enabled(True)
 		_.tmc.set_acceleration(_.max_accel)
 		_.tmc.set_max_speed(_.max_speed)
-		_.tmc.set_current_position(0)
+		_.tmc.set_current_position(100)
 		
-		_.pins = {
-			"r": 5,
-			"g": 6,
-			"b": 13
-		}
-		GPIO.setmode(GPIO.BCM)
-		for color, pin in _.pins.items():
-			GPIO.setup(pin, GPIO.OUT)
-		_.led_Off()
+		_.led = RGBLED(5, 6, 13)
 		
-	def deinit(_):
+		_.tmc.run_to_position_steps_threaded(1)
+		
+	def deinit(_, complete=True):
 		_.tmc.set_motor_enabled(False)
-		for color, pin in _.pins.items():
-			GPIO.cleanup(pin)
+		if complete:
+			_.tmc.deinit()
 
 	def mm_to_steps(_, mm):
 		return int(mm/0.04*_.ms_res*0.95)
@@ -51,25 +44,46 @@ class Motor:
 
 	def home(_):
 		_.tmc.run_to_position_steps(_.mm_to_steps(-_.max_dist))
+		time.sleep(0.1)
+		_.tmc.run_to_position_steps(_.mm_to_steps(1))
 
 	def stall_callback(_, channel):
 		if (_.tmc.get_stallguard_result() != 0):
 			print("StallGuard!	:	", _.tmc.get_stallguard_result())
 			_.tmc.stop(stop_mode=StopMode.HARDSTOP)
-			_.led_R()
+			_.set_led((1, 0, 0))
 			
-	def push(_, dist=1):
+	def push(_, dist=1, wait=False):
+		prev_color = _.led.value
+		_.set_led((1, 1, 0))
+		_.stop()
+		_.wait()
 		if (_.steps_to_mm(_.tmc.get_current_position()) + dist < _.max_dist):
-			_.tmc.run_to_position_steps(_.mm_to_steps(dist))
+			_.tmc.run_to_position_steps_threaded(_.mm_to_steps(dist))
 		else:
-			_.tmc.run_to_position_steps(_.mm_to_steps(_.max_dist), MovementAbsRel.ABSOLUTE)
+			_.tmc.run_to_position_steps_threaded(_.mm_to_steps(_.max_dist), MovementAbsRel.ABSOLUTE)
+		if wait:
+			_.wait()
+		_.set_led(prev_color)
+		print("push", _.steps_to_mm(_.tmc.get_current_position()))
 			
-	def pull(_, dist=1):
-		if (_.steps_to_mm(_.tmc.get_current_position()) - dist > 0):
-			_.tmc.run_to_position_steps(_.mm_to_steps(-dist))
+	def pull(_, dist=1, wait=False):
+		prev_color = _.led.value
+		_.set_led((0, 1, 1))
+		_.stop()
+		_.wait()
+		if (_.steps_to_mm(_.tmc.get_current_position()) - dist > _.min_dist):
+			_.tmc.run_to_position_steps_threaded(_.mm_to_steps(-dist))
 		else:
-			_.tmc.run_to_position_steps(0, MovementAbsRel.ABSOLUTE)
+			_.tmc.run_to_position_steps_threaded(_.min_dist, MovementAbsRel.ABSOLUTE)
+		if wait:
+			_.wait()
+		_.set_led(prev_color)
+		print("pull", _.steps_to_mm(_.tmc.get_current_position()))
 			
+	def wait(_):
+		_.tmc.wait_for_movement_finished_threaded()
+	
 	def stop(_):
 		_.tmc.stop(stop_mode=StopMode.HARDSTOP)
 			
@@ -90,22 +104,10 @@ class Motor:
 		_.max_accel = accel
 		_.tmc.set_acceleration(_.max_accel)
 		
-	def led_R(_):
-		GPIO.output(_.pins["r"], GPIO.HIGH)
-		GPIO.output(_.pins["g"], GPIO.LOW)
-		GPIO.output(_.pins["b"], GPIO.LOW)
+	def get_led(_):
+		return _.led.value
 		
-	def led_G(_):
-		GPIO.output(_.pins["r"], GPIO.LOW)
-		GPIO.output(_.pins["g"], GPIO.HIGH)
-		GPIO.output(_.pins["b"], GPIO.LOW)
+	def set_led(_, rgb):
+		_.led.color = (rgb[0], rgb[1], rgb[2])
 		
-	def led_B(_):
-		GPIO.output(_.pins["r"], GPIO.LOW)
-		GPIO.output(_.pins["g"], GPIO.LOW)
-		GPIO.output(_.pins["b"], GPIO.HIGH)
-		
-	def led_Off(_):
-		GPIO.output(_.pins["r"], GPIO.LOW)
-		GPIO.output(_.pins["g"], GPIO.LOW)
-		GPIO.output(_.pins["b"], GPIO.LOW)
+

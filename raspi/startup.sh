@@ -4,4 +4,4 @@
 #sleep 5
 #echo "quit\n" | bluetoothctl
 sudo python3 /home/pi/RoboTuner/raspi/Home_Motor.py
-sudo python3 /home/pi/RoboTuner/raspi/Motor.py
+sudo python3 /home/pi/RoboTuner/raspi/Controller.py
