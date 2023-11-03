@@ -12,7 +12,7 @@ sends instructions to the tuner that tell it
 what to do
 
 """
-#import Motor as motor
+from Motor import Motor
 import pyaudio
 import statistics as stat
 import Tuner
@@ -21,7 +21,7 @@ import sys
 
 print(sys.path)
 
-
+max_steps = Motor.mm_to_steps(40)
 
 # Initializes variables
 
@@ -34,6 +34,8 @@ TOLERANCE = .85 # Confidence threshold
 
 # Creates a list of all notes
 notes = Tuner.initialize_notes()
+
+motor = Motor(40)
 
 # Create PyAudio Object
 p = pyaudio.PyAudio()
@@ -99,18 +101,12 @@ while True:
          " Average tendency " + str(nearest_note.get_tendency()) +
          " Times Played: " + str(nearest_note.total_times_played))
 
+
     if (tendency < 0):
-        # in the future, check to see if the slide is at its min or max length
-        #motor.pull()
-        #current_step -= 1  #is it one step per pull?
-        print("pull")
-        print(current_step)
+        motor.pull(.01)
 
     elif (tendency > 0):
-        #motor.push()
-        current_step += 1
-        print("push")
-        print(current_step)
+        Motor.push(.01)
 
     else:
         continue;
