@@ -14,8 +14,8 @@ def random_movement(hrs=3):
 		else:
 			motor.pull(rand.random()*9 + 1, True)
 	
-	f.write(f"Completed Battery Life Testing at {t_dif/60+(3*60)-1} minutes\n")
+	f.write(f"Completed Battery Life Testing at {t_dif/60} minutes\n")
 	f.close()
 	
 if __name__ == "__main__":
-	random_movement(1/60)
+	random_movement(3)

@@ -6,7 +6,7 @@ from gpiozero import RGBLED
 class Motor:
 	tmc = None
 	
-	def __init__(_, max_dist=100, min_dist=0, speed=2000, accel=900, en_pin=21, step_pin=16, dir_pin=20, stall_pin=26, ms_res=2):
+	def __init__(_, max_dist=100, min_dist=0, speed=2000, accel=1500, en_pin=21, step_pin=16, dir_pin=20, stall_pin=26, ms_res=2):
 		_.max_dist = max_dist
 		_.min_dist = min_dist
 		_.max_accel = accel
@@ -21,11 +21,11 @@ class Motor:
 		_.tmc.set_spreadcycle(False)
 		_.tmc.set_microstepping_resolution(ms_res)
 		_.tmc.set_internal_rsense(False)
-		_.tmc.set_stallguard_callback(26, 50, _.stall_callback, 500)
+		#_.tmc.set_stallguard_callback(26, 50, _.stall_callback, 500)
 		_.tmc.set_motor_enabled(True)
 		_.tmc.set_acceleration(_.max_accel)
 		_.tmc.set_max_speed(_.max_speed)
-		_.tmc.set_current_position(100)
+		_.tmc.set_current_position(0)
 		
 		_.led = RGBLED(5, 6, 13)
 		
