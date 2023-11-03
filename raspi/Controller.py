@@ -22,7 +22,7 @@ import sys
 
 print(sys.path)
 
-max_steps = Motor.mm_to_steps(40)
+max_steps = motor.mm_to_steps(40)
 
 # Initializes variables
 
@@ -115,7 +115,7 @@ while True:
         motor.pull(.01)
 
     elif (tendency > 0):
-        Motor.push(.01)
+        motor.push(.01)
 
     else:
         continue;
