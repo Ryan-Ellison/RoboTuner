@@ -147,7 +147,12 @@ class ProfileInputWindow(QMainWindow):
     def importProfilesFromRaspberryPi(self):
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect("10.186.150.39", username="pi", password="raspberry")
+        try:
+            ssh.connect("10.186.150.39", username="pi", password="raspberry")
+        except:
+            self.generateWarningDialog("Raspberry Pi not found", "Raspberry Pi not fount")
+            ssh.close()
+            return
         sftp = ssh.open_sftp()
         try:
             sftp.get("profiles.txt", "tempProfiles.txt")
@@ -180,12 +185,17 @@ class ProfileInputWindow(QMainWindow):
         maxSlideLength = self.slideMaxLengthInput.text()
         maxSlideSpeed = self.slideMaxSpeedInput.text()
         settings = [maxSlideLength, "\n", maxSlideSpeed]
+        ssh = paramiko.SSHClient()
+        try:
+            ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
+            ssh.connect("10.186.150.39", username="pi", password="raspberry")
+        except:
+            self.generateWarningDialog("Raspberry Pi not found", "Raspberry Pi not found")
+            ssh.close()
+            return
         configFile = open("config.txt", "x")
         configFile.writelines(settings)
         configFile.close()
-        ssh = paramiko.SSHClient()
-        ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
-        ssh.connect("10.186.150.39", username="pi", password="raspberry")
         sftp = ssh.open_sftp()
         if os.path.isfile("config.txt"):
             print("listing dir")
