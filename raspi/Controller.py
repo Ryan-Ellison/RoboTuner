@@ -13,6 +13,7 @@ what to do
 
 """
 #import Motor as motor
+import json
 import pyaudio
 import statistics as stat
 import Tuner
@@ -34,6 +35,17 @@ TOLERANCE = .85 # Confidence threshold
 
 # Creates a list of all notes
 notes = Tuner.initialize_notes()
+
+notesDict = {note.name:note.tendency for note in notes}
+
+file = open("notes.json", "w")
+
+json_format = json.dumps(notesDict, indent=4)
+
+for line in json_format:
+    file.write(line)
+
+file.close()
 
 # Create PyAudio Object
 p = pyaudio.PyAudio()

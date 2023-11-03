@@ -12,6 +12,7 @@ from PyQt6.QtWidgets import (
     QTabWidget,
 )
 
+
 class TabManager(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -50,11 +51,13 @@ class TabManager(QMainWindow):
         else:
             self.timer.setSingleShot(True)
     """
-
+"""
 # PATH = "/Users/ryanellison/VSCode Projects/RoboTuner/"
 
 # sys.path.insert(0, PATH)
 # os.chdir(PATH)
+
+"""
 
 app = QApplication(sys.argv)
 

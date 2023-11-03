@@ -1,22 +1,16 @@
-
-import Note
 import sys
-from profile import Profile
-from datetime import datetime
-from functools import cmp_to_key
+from pathlib import Path
+pyaudioPath = str(Path(__file__).parent.parent) + "/raspi"
+print(pyaudioPath)
+sys.path.insert(0, pyaudioPath)
+
 
 from PyQt6.QtWidgets import (
-    QComboBox,
     QMainWindow,
-    QPushButton,
-    QLineEdit,
     QLabel,
     QGridLayout,
     QWidget,
-    QInputDialog,
-    QDialog,
-    QDialogButtonBox,
-    QVBoxLayout, QApplication
+    QApplication
 )
 from PyQt6.QtGui import QIntValidator
 

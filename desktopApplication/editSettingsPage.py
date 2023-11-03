@@ -66,7 +66,7 @@ class ProfileInputWindow(QMainWindow):
 
         # Create a textbox and label for slide min length
         self.slideMinLengthInput = QLineEdit()
-        self.slideMinLengthInput.setValidator(intRange)
+        self.slideMinLengthInput .setValidator(intRange)
         self.slideMinLengthLabel = QLabel()
         self.slideMinLengthLabel.setText("Min slide length (in)")
 
