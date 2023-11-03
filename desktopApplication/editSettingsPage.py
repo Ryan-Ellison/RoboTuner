@@ -1,8 +1,10 @@
 import sys
+import os
 from instrumentProfiles import InstrumentProfile
 from datetime import datetime
 from functools import cmp_to_key
 from pathlib import Path
+import paramiko
 import shutil
 import re
 
@@ -39,8 +41,11 @@ class ProfileInputWindow(QMainWindow):
         self.renameProfileButton = QPushButton("Rename Current Profile")
         self.sortOrderButton = QPushButton("Sort By Date")
         self.sortByName = True
-        self.exportProfileButton = QPushButton("Export Profiles")
-        self.importProfileButton = QPushButton("Import Profiles")
+        self.exportProfileButton = QPushButton("Export Profiles To Desktop")
+        self.importProfileButton = QPushButton("Import Profiles From Desktop")
+        self.updateRaspberryPiButton = QPushButton("Update Raspberry Pi")
+        self.exportProfilesToRPButton = QPushButton("Export Profiles To Device")
+        self.importProfilesFromRPButton = QPushButton("Import Profiles From Device")
 
         # Link the button with created functions and toggle variable
         self.saveButton.clicked.connect(self.saveProfile)
@@ -52,7 +57,9 @@ class ProfileInputWindow(QMainWindow):
         self.sortOrderButton.setCheckable(True)
         self.exportProfileButton.clicked.connect(self.exportProfiles)
         self.importProfileButton.clicked.connect(self.importProfiles)
-        
+        self.updateRaspberryPiButton.clicked.connect(self.updateRaspberryPi)
+        self.exportProfilesToRPButton.clicked.connect(self.exportProfilesToRaspberryPi)
+        self.importProfilesFromRPButton.clicked.connect(self.importProfilesFromRaspberryPi)
 
         intRange = QIntValidator()
         intRange.setBottom(0)
@@ -110,6 +117,9 @@ class ProfileInputWindow(QMainWindow):
         layout.addWidget(self.renameProfileButton, 5, 2)
         layout.addWidget(self.exportProfileButton, 6, 0)
         layout.addWidget(self.importProfileButton, 6, 1)
+        layout.addWidget(self.updateRaspberryPiButton, 6, 2)
+        layout.addWidget(self.exportProfilesToRPButton, 7, 0)
+        layout.addWidget(self.importProfilesFromRPButton, 7, 1)
 
         # Utilize the layout as a widget
         container = QWidget()
@@ -117,6 +127,85 @@ class ProfileInputWindow(QMainWindow):
 
         # Place the layout in the app window
         self.setCentralWidget(container)
+
+    # Exports profiles to the raspberry pi
+    def exportProfilesToRaspberryPi(self):
+        profilesPath = str(Path(__file__).parent) + "/.profiles.txt"
+        ssh = paramiko.SSHClient()
+        ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
+        ssh.connect("10.186.150.39", username="pi", password="raspberry")
+        sftp = ssh.open_sftp()
+        if os.path.isfile(profilesPath):
+            sftp.put(profilesPath, "profiles.txt")
+        else:
+            print("wtf")
+        sftp.close()
+        ssh.close()
+        
+
+    # Imports profiles from the raspberry pi
+    def importProfilesFromRaspberryPi(self):
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        try:
+            ssh.connect("10.186.150.39", username="pi", password="raspberry")
+        except:
+            self.generateWarningDialog("Raspberry Pi not found", "Raspberry Pi not fount")
+            ssh.close()
+            return
+        sftp = ssh.open_sftp()
+        try:
+            sftp.get("profiles.txt", "tempProfiles.txt")
+        except:
+            self.generateWarningDialog("Missing profiles", "No profiles file on hardware.\nPlease export to the hardware before importing.")
+            sftp.close()
+            ssh.close()
+            return
+        sftp.close()
+        ssh.close()
+        fname = "tempProfiles.txt"
+        file = open(file=fname, mode="r")
+
+        if not self.verifyProfileFile(file):
+            self.generateWarningDialog("Invalid File", "Invalid file.\nPlease choose another file.")
+            return
+        newProfiles = self.readProfilesFromFile(fname)
+        for profile in newProfiles.keys():
+            if profile in self.profiles.keys():
+                continue
+            self.profiles[profile] = newProfiles[profile]
+
+        self.updateProfilesFiles()
+        self.loadProfiles()
+        file.close()
+        os.remove(fname)
+
+    # Updates Raspberry Pi Settings
+    def updateRaspberryPi(self):
+        maxSlideLength = self.slideMaxLengthInput.text()
+        maxSlideSpeed = self.slideMaxSpeedInput.text()
+        settings = [maxSlideLength, "\n", maxSlideSpeed]
+        ssh = paramiko.SSHClient()
+        try:
+            ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
+            ssh.connect("10.186.150.39", username="pi", password="raspberry")
+        except:
+            self.generateWarningDialog("Raspberry Pi not found", "Raspberry Pi not found")
+            ssh.close()
+            return
+        configFile = open("config.txt", "x")
+        configFile.writelines(settings)
+        configFile.close()
+        sftp = ssh.open_sftp()
+        if os.path.isfile("config.txt"):
+            print("listing dir")
+            sftp.listdir(path="/..")
+            sftp.put("config.txt", "./config.txt")
+        else:
+            print("wtf")
+        sftp.close()
+        ssh.close()
+        os.remove("config.txt")
 
     # Imports profiles
     def importProfiles(self):
