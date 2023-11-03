@@ -63,31 +63,31 @@ class ProfileInputWindow(QMainWindow):
 
         intRange = QIntValidator()
         intRange.setBottom(0)
-        intRange.setTop(9)
+        intRange.setTop(100)
 
         # Create a textbox and label for slide max length
         self.slideMaxLengthInput = QLineEdit()
         self.slideMaxLengthInput.setValidator(intRange)
         self.slideMaxLengthLabel = QLabel()
-        self.slideMaxLengthLabel.setText("Max slide length (in)")
+        self.slideMaxLengthLabel.setText("Max slide length (mm)")
 
         # Create a textbox and label for slide min length
         self.slideMinLengthInput = QLineEdit()
         self.slideMinLengthInput .setValidator(intRange)
         self.slideMinLengthLabel = QLabel()
-        self.slideMinLengthLabel.setText("Min slide length (in)")
+        self.slideMinLengthLabel.setText("Min slide length (mm)")
 
         # Create a textbox and label for slide max speed
         self.slideMaxSpeedInput = QLineEdit()
         self.slideMaxSpeedInput.setValidator(intRange)
         self.slideMaxSpeedLabel = QLabel()
-        self.slideMaxSpeedLabel.setText("Max slide speed (in/sec)")
+        self.slideMaxSpeedLabel.setText("Max slide speed (mm/sec)")
 
         # Create a textbox and label for slide min speed
         self.slideMinSpeedInput = QLineEdit()
         self.slideMinSpeedInput.setValidator(intRange)
         self.slideMinSpeedLabel = QLabel()
-        self.slideMinSpeedLabel.setText("Min slide speed before error thrown (in/sec)")
+        self.slideMinSpeedLabel.setText("Min slide speed before error thrown (mm/sec)")
 
         # Set text boxes to initial values
         self.profile = None
