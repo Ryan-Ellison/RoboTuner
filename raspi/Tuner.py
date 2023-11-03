@@ -67,7 +67,7 @@ def tuner(audio_stream, sampling_rate, num_channels,
 
     # Read audio into a buffer
     frames = []
-    for i in range(0, int((sampling_rate / frames_per_buffer) * .2)):
+    for i in range(0, int((sampling_rate / frames_per_buffer) * .1)):
         data = audio_stream.read(frames_per_buffer, False)
         frames.append(data)
 
