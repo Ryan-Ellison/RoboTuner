@@ -31,7 +31,7 @@ NUM_CHANNELS = 1
 FRAMES_PER_BUFFER = 1024
 SAMPLING_RATE = 44100
 FORMAT = pyaudio.paInt16
-TOLERANCE = .8 # Confidence threshold
+TOLERANCE = .85 # Confidence threshold
 
 # Initialize buzzer pins for reference pitch
 ref_pitch = TonalBuzzer(12, octaves=3)
@@ -70,6 +70,8 @@ notes = Tuner.initialize_notes()
 f = open("/home/pi/config.txt")
 max_dist = int(f.readline())
 max_speed = int(f.readline())
+#max_dist = 70
+#max_speed = 60
 f.close()
 
 motor = Motor(max_dist)
@@ -125,7 +127,7 @@ while True:
             timer = halt_timer = time.time()
             timer_set = True
         if timer_set:
-            if time.time() - timer > 1:
+            if time.time() - timer > .2:
                 if not mode_switch:
                     motor.stop()
                     motor.wait()
@@ -173,11 +175,11 @@ while True:
 
 
     if not mode_switch:
-        if (tendency < 0 and motor_state != False):
+        if (tendency < -2 and motor_state != False):
             motor.pull(max_dist)
             motor_state = False
 
-        elif (tendency > 0 and motor_state != True):
+        elif (tendency > 2 and motor_state != True):
             motor.push(max_dist)
             motor_state = True
     else:
