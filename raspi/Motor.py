@@ -43,10 +43,10 @@ class Motor:
 		for color, pin in _.pins.items():
 			GPIO.cleanup(pin)
 
-	def mm_to_steps(_, mm):
+	def mm_to_steps(self, mm):
 		return int(mm/0.04*_.ms_res*0.95)
 		
-	def steps_to_mm(_, steps):
+	def steps_to_mm(self_, steps):
 		return steps/0.95/_.ms_res*0.04
 
 	def home(_):
