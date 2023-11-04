@@ -8,6 +8,8 @@ Last edited 10/18/2023
 This class measures the frequency of an audio sample
 
 """
+import math
+
 from aubio import pitch
 from aubio import source
 import Note
@@ -16,6 +18,18 @@ import wave
 
 
 # Creates a list of all notes
+
+
+def hz_to_midi(hz):
+    if (hz < 2) or (hz > 100000):
+        return -1
+    midi = hz / 440
+    midi = math.log2(midi)
+    midi *= 12
+    midi += 69
+    return midi
+
+
 def initialize_notes():
 
     note_names = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
@@ -57,17 +71,13 @@ def tuner(audio_stream, sampling_rate, num_channels,
 
     # Computes midi and hz values
     pitch_hz_o = pitch("yin", win_s, hop_s, sampling_rate)
-    pitch_midi_o = pitch("yin", win_s, hop_s, sampling_rate)
 
     pitch_hz_o.set_unit("Hz")
     pitch_hz_o.set_tolerance(tolerance)
 
-    pitch_midi_o.set_unit("midi")
-    pitch_midi_o.set_tolerance(tolerance)
-
     # Read audio into a buffer
     frames = []
-    for i in range(0, int((sampling_rate / frames_per_buffer) * .1)):
+    for i in range(0, int((sampling_rate / frames_per_buffer) * .05)):
         data = audio_stream.read(frames_per_buffer, False)
         frames.append(data)
 
@@ -92,8 +102,7 @@ def tuner(audio_stream, sampling_rate, num_channels,
     while True:
         samples, read = s()
         pitch_hz = pitch_hz_o(samples)[0]
-        pitch_midi = pitch_midi_o(samples)[0]
-
+        pitch_midi = hz_to_midi(pitch_hz)
         confidence = pitch_hz_o.get_confidence()
 
         if read < hop_s:
