@@ -63,11 +63,9 @@ def initialize_notes():
 def tuner(audio_stream, sampling_rate, num_channels,
           frames_per_buffer, tolerance, sample_size):
 
-
     # Window size of fft and size of hop
-    win_s = 2048
+    win_s = 1024
     hop_s = 512
-
 
     # Computes midi and hz values
     pitch_hz_o = pitch("yin", win_s, hop_s, sampling_rate)
