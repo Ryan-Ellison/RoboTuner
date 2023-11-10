@@ -1,7 +1,11 @@
 from Motor import Motor
+from Display import Display
 import time
 
+display = Display()
+time.sleep(2)
 motor = Motor()
+display.homing()
 motor.set_led((0, 1, 0))
 motor.set_speed(500)
 motor.set_accel(1000)

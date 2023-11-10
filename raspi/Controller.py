@@ -13,6 +13,7 @@ what to do
 
 """
 from Motor import Motor
+from Display import Display
 import pyaudio
 import statistics as stat
 import Tuner
@@ -32,6 +33,9 @@ FRAMES_PER_BUFFER = 1024
 SAMPLING_RATE = 44100
 FORMAT = pyaudio.paInt16
 TOLERANCE = .85 # Confidence threshold
+
+# Create Display object
+display = Display()
 
 # Initialize buzzer pins for reference pitch
 ref_pitch = TonalBuzzer(12, octaves=3)
@@ -61,6 +65,7 @@ def switch_modes():
         motor.set_led((0, 0, 0))
         time.sleep(0.2)
         motor.set_led((1, 0, 0))
+        hold_repeated = False
 rp_button.when_held = switch_modes
 
 # Creates a list of all notes
@@ -73,7 +78,6 @@ max_speed = int(f.readline())
 #max_dist = 70
 #max_speed = 60
 f.close()
-
 motor = Motor(max_dist)
 motor.set_speed(motor.mm_to_steps(max_speed))
 
@@ -122,6 +126,7 @@ while True:
             if not mode_switch:
                 motor.set_led((0, 1, 0))
             else:
+                display.update_data(False)
                 motor.set_led((0, 0, 1))
         if not timer_set:
             timer = halt_timer = time.time()
@@ -145,6 +150,7 @@ while True:
         continue
 
     timer_set = False
+    hold_repeated = False
 
     # Convert pitch to midi value
     midi = int(round(stat.median(pitch[1])))
@@ -172,6 +178,8 @@ while True:
     print("Note = " + nearest_note.name + " Cents: " + str(tendency) +
          " Average tendency " + str(nearest_note.get_tendency()) +
          " Times Played: " + str(nearest_note.total_times_played))
+         
+    display.update_data(note=nearest_note.name, cents_off=str(tendency))
 
 
     if not mode_switch:
