@@ -54,6 +54,15 @@ class Note:
         self.total_times_played += 1
         self.total_cents += cents
         self.tendency = self.total_cents / self.total_times_played
+        file = open("notes.json", "r")
+        lines = file.readlines()
+        line_index = self.midi - 23
+        lines[line_index] = "    \"" + self.name + "\": " + str(self.tendency) + ",\n"
+        file.close()
+        file = open("notes.json", "w+")
+        file.writelines(lines)
+        file.close()
+
 
 
     def get_tendency(self):

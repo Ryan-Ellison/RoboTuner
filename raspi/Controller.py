@@ -14,6 +14,7 @@ what to do
 """
 from Motor import Motor
 from Display import Display
+import json
 import pyaudio
 import statistics as stat
 import Tuner
@@ -81,6 +82,16 @@ f.close()
 motor = Motor(max_dist)
 motor.set_speed(motor.mm_to_steps(max_speed))
 
+notesDict = {note.name:note.tendency for note in notes}
+
+file = open("notes.json", "w")
+
+json_format = json.dumps(notesDict, indent=4)
+
+for line in json_format:
+    file.write(line)
+
+file.close()
 # Create PyAudio Object
 p = pyaudio.PyAudio()
 
@@ -179,7 +190,7 @@ while True:
          " Average tendency " + str(nearest_note.get_tendency()) +
          " Times Played: " + str(nearest_note.total_times_played))
          
-    display.update_data(note=nearest_note.name, cents_off=str(tendency))
+    display.update_data(mode=not mode_switch, note=nearest_note.name, cents_off=str(tendency))
 
 
     if not mode_switch:
