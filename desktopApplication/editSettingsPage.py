@@ -137,7 +137,7 @@ class ProfileInputWindow(QMainWindow):
         profilesPath = str(Path(__file__).parent) + "/.profiles.txt"
         ssh = paramiko.SSHClient()
         ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
-        ssh.connect("10.186.150.39", username="pi", password="raspberry")
+        ssh.connect("10.186.42.101", username="pi", password="raspberry")
         sftp = ssh.open_sftp()
         if os.path.isfile(profilesPath):
             sftp.put(profilesPath, "profiles.txt")
@@ -152,7 +152,7 @@ class ProfileInputWindow(QMainWindow):
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            ssh.connect("10.186.150.39", username="pi", password="raspberry")
+            ssh.connect("10.186.42.101", username="pi", password="raspberry")
         except:
             self.generateWarningDialog("Raspberry Pi not found", "Raspberry Pi not fount")
             ssh.close()
@@ -196,7 +196,7 @@ class ProfileInputWindow(QMainWindow):
         ssh = paramiko.SSHClient()
         try:
             ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
-            ssh.connect("10.186.150.39", username="pi", password="raspberry", timeout=10)
+            ssh.connect("10.186.42.101", username="pi", password="raspberry", timeout=10)
         except:
             self.generateWarningDialog("Raspberry Pi not found", "Raspberry Pi not found")
             ssh.close()

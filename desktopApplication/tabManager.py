@@ -5,6 +5,7 @@ from landingPage import LandingPage
 from cadFilesPage import CADFilesWindow
 from noteDisplayPage import NoteDisplayPage
 from hardwareSpecificationsPage import HardwareSpecificationsPage
+from tuningTendencyPage import TuningTendencyWindow
 
 from PyQt6.QtWidgets import (
     QApplication,
@@ -29,6 +30,7 @@ class TabManager(QMainWindow):
         self.cadFilesWindow = CADFilesWindow()
         self.noteDiplayPage = NoteDisplayPage()
         self.hardwareSpecificationsPage = HardwareSpecificationsPage()
+        self.tuningTendencyWindow = TuningTendencyWindow()
 
         # self.timer = QTimer(self)
 
@@ -37,6 +39,7 @@ class TabManager(QMainWindow):
         self.tabs.addTab(self.cadFilesWindow, "CAD Files")
         self.tabs.addTab(self.noteDiplayPage, "Display Note")
         self.tabs.addTab(self.hardwareSpecificationsPage, "Hardware Specifications")
+
 
         # self.tabs.tabBarClicked.connect(self.tabSelected)
 
