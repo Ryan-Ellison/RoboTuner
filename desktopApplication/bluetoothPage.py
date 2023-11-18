@@ -1,9 +1,12 @@
 import sys
 
-from PyQt6 import QtBluetooth
+from PyQt6 import QtBluetooth as PyQtBt
 from PyQt6.QtBluetooth import (
     QBluetoothDeviceDiscoveryAgent,
-    QBluetoothDeviceInfo
+    QBluetoothDeviceInfo,
+    QBluetoothSocket,
+    QBluetoothServiceInfo,
+    QBluetoothAddress
 )
 from PyQt6.QtWidgets import (
     QApplication,
@@ -34,6 +37,7 @@ class bluetoothPage(QMainWindow):
         self.setWindowTitle("RoboTuner")
         
         self.discoveryAgent = QBluetoothDeviceDiscoveryAgent(self)
+        self.discoveryAgent.setLowEnergyDiscoveryTimeout(5000)
         self.discoveryAgent.deviceDiscovered.connect(self.addItem)
         self.discoveryAgent.finished.connect(self.scanFinished)
         self.discoveryAgent.canceled.connect(self.scanFinished)
@@ -65,17 +69,38 @@ class bluetoothPage(QMainWindow):
         print("item found")
 
     def scanFinished(self):
+        print("search fin")
         for device in self.btDevices:
-            #QtBluetooth.QBluetoothDeviceInfo.
             print('UUID: {UUID}, Name: {name}, rssi: {rssi}'.format(UUID=device.deviceUuid().toString(),
                                                                     name=device.name(),
                                                                     rssi=device.rssi()))
             if device.name() == "raspberrypi":
-                print("yurrrr")
+                self.connectToPi(device)
+                break
+
+    def connectToPi(self, device):
+        self.sock = QBluetoothSocket(QBluetoothServiceInfo.Protocol(3))
+
+        self.sock.connected.connect(self.connectedToBluetooth)
+        #self.sock.readyRead.connect(self.receivedBluetoothMessage)
+        self.sock.disconnected.connect(self.disconnectedFromBluetooth)
+        self.sock.errorOccurred.connect(self.socketError)
+        port = 1
+        print(device.address().toString())
+        self.sock.connectToService(device.address(),port)
+
+    def connectedToBluetooth(self):
+        print("connected :)")
+    
+    def socketError(self, error):
+        print(error)
+        print("socket error :(")
+
+    def disconnectedFromBluetooth(self):
+        print("disconnected :/")
 
     def endDiscoveryService(self):
         self.discoveryAgent.stop()
-        print("search fin")
 
 
 app = QApplication(sys.argv)
