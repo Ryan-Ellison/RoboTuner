@@ -3,6 +3,7 @@ from Display import Display
 import time
 
 display = Display()
+display.update_display("RoboTuner\nbooting up...")
 time.sleep(2)
 motor = Motor()
 display.homing()

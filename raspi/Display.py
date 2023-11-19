@@ -23,7 +23,7 @@ class Display:
 		_.homing_str = "homing..."
 		_.res_det_str = "RESISTANCE DETECTED\n\nPlease lubricate\nyour tuning slide"
 		
-		_.update_display(startup_msg)
+		# ~ _.update_display(startup_msg)
 
 	def update_display(_, msg, offsetx=2, offsety=2):
 		_.draw.rectangle((0, 0, _.width, _.height), 0)
