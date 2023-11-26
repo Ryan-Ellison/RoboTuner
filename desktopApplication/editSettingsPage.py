@@ -21,6 +21,7 @@ from PyQt6.QtWidgets import (
     QDialogButtonBox, 
     QVBoxLayout,
     QFileDialog,
+    QApplication
 )
 from PyQt6.QtGui import QIntValidator
 from PyQt6.QtCore import QDir
@@ -49,6 +50,7 @@ class ProfileInputWindow(QMainWindow):
         self.updateRaspberryPiButton = QPushButton("Update Raspberry Pi")
         self.exportProfilesToRPButton = QPushButton("Export Profiles To Device")
         self.importProfilesFromRPButton = QPushButton("Import Profiles From Device")
+        self.resetRaspberryPiButton = QPushButton("Reset Raspberry Pi Files")
 
         # Link the button with created functions and toggle variable
         self.saveButton.clicked.connect(self.saveProfile)
@@ -63,6 +65,7 @@ class ProfileInputWindow(QMainWindow):
         self.updateRaspberryPiButton.clicked.connect(self.updateRaspberryPi)
         self.exportProfilesToRPButton.clicked.connect(self.exportProfilesToRaspberryPi)
         self.importProfilesFromRPButton.clicked.connect(self.importProfilesFromRaspberryPi)
+        self.resetRaspberryPiButton.clicked.connect(self.resetRaspberryPiConfirmation)
 
         intRange = QIntValidator()
         intRange.setBottom(0)
@@ -127,6 +130,7 @@ class ProfileInputWindow(QMainWindow):
         layout.addWidget(self.updateRaspberryPiButton, 6, 2)
         layout.addWidget(self.exportProfilesToRPButton, 7, 0)
         layout.addWidget(self.importProfilesFromRPButton, 7, 1)
+        layout.addWidget(self.resetRaspberryPiButton, 8, 0)
 
         # Utilize the layout as a widget
         container = QWidget()
@@ -135,20 +139,62 @@ class ProfileInputWindow(QMainWindow):
         # Place the layout in the app window
         self.setCentralWidget(container)
 
+    # Reset raspberry pi files
+    def resetRaspberryPiConfirmation(self):
+        resetPiWarning = QDialog()
+        resetPiWarning.setWindowTitle("Reset Raspberry Pi")
+
+        warningButtons = QDialogButtonBox.StandardButton.Yes | QDialogButtonBox.StandardButton.No
+
+        # accept and reject connections close the dialog box
+        buttonBox = QDialogButtonBox(warningButtons)
+        buttonBox.accepted.connect(resetPiWarning.accept)
+        buttonBox.rejected.connect(resetPiWarning.reject)
+
+        # Delete the profile only when confirmation is accepted
+        buttonBox.accepted.connect(self.resetRaspberryPi)
+
+        resetPiWarning.layout = QVBoxLayout()
+        resetPiWarning.layout.addWidget(QLabel("Only use this command if your device is having errors running.\nPlease confirm."))
+        resetPiWarning.layout.addWidget(buttonBox)
+        resetPiWarning.setLayout(resetPiWarning.layout)
+
+        resetPiWarning.exec()
+
+    def resetRaspberryPi(self):
+        ssh = paramiko.SSHClient()
+        ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
+        ssh.connect(self.RASPBERRYPIPATH, username="pi", password="raspberry")
+        sftp = ssh.open_sftp()
+        print("Deleting files")
+        sftp.rmdir("zipTester")
+        print("Transferring new zipped files")
+        zippedFilesPath = str(Path(__file__).parent) + "/.zipTester.zip"
+        sftp.put(zippedFilesPath, "zipTester.zip")
+        print("Unzipping files")
+        stdin, stdout, stderr = ssh.exec_command("unzip zipTester.zip")
+        stdout.read()
+        print("fin")
+        
+
     # Exports profiles to the raspberry pi
     def exportProfilesToRaspberryPi(self):
         profilesPath = str(Path(__file__).parent) + "/.profiles.txt"
         ssh = paramiko.SSHClient()
         ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
-        ssh.connect(self.RASPBERRYPIPATH, username="pi", password="raspberry")
+        try:
+            ssh.connect(self.RASPBERRYPIPATH, username="pi", password="raspberry", timeout=10)
+        except:
+            self.generateWarningDialog("Raspberry Pi not found", "Raspberry Pi not fount")
+            ssh.close()
+            return
         sftp = ssh.open_sftp()
         if os.path.isfile(profilesPath):
             sftp.put(profilesPath, "profiles.txt")
         else:
-            print("wtf")
+            print("no profiles to export")
         sftp.close()
         ssh.close()
-        
 
     # Imports profiles from the raspberry pi
     def importProfilesFromRaspberryPi(self):
@@ -441,10 +487,9 @@ class ProfileInputWindow(QMainWindow):
 
         warning.exec()
 
-""" 
 app = QApplication(sys.argv)
 
 window = ProfileInputWindow()
 window.show()
 
-app.exec() """
+app.exec()
