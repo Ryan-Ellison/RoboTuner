@@ -1,6 +1,7 @@
 import sys
 import os
 from instrumentProfiles import InstrumentProfile
+from 
 from datetime import datetime
 from functools import cmp_to_key
 from pathlib import Path
@@ -51,6 +52,7 @@ class ProfileInputWindow(QMainWindow):
         self.exportProfilesToRPButton = QPushButton("Export Profiles To Device")
         self.importProfilesFromRPButton = QPushButton("Import Profiles From Device")
         self.resetRaspberryPiButton = QPushButton("Reset Raspberry Pi Files")
+        self.importExportProfilesButton = QPushButton("Import/Export Profiles To/From Device")
 
         # Link the button with created functions and toggle variable
         self.saveButton.clicked.connect(self.saveProfile)
@@ -66,6 +68,7 @@ class ProfileInputWindow(QMainWindow):
         self.exportProfilesToRPButton.clicked.connect(self.exportProfilesToRaspberryPi)
         self.importProfilesFromRPButton.clicked.connect(self.importProfilesFromRaspberryPi)
         self.resetRaspberryPiButton.clicked.connect(self.resetRaspberryPiConfirmation)
+        self.importExportProfilesButton.clicked.connect(self.importExportProfiles)
 
         intRange = QIntValidator()
         intRange.setBottom(0)
@@ -131,6 +134,7 @@ class ProfileInputWindow(QMainWindow):
         layout.addWidget(self.exportProfilesToRPButton, 7, 0)
         layout.addWidget(self.importProfilesFromRPButton, 7, 1)
         layout.addWidget(self.resetRaspberryPiButton, 8, 0)
+        layout.addWidget(self.importExportProfilesButton, 8, 1)
 
         # Utilize the layout as a widget
         container = QWidget()
@@ -138,6 +142,9 @@ class ProfileInputWindow(QMainWindow):
 
         # Place the layout in the app window
         self.setCentralWidget(container)
+
+    def importExportProfiles(self):
+
 
     # Reset raspberry pi files
     def resetRaspberryPiConfirmation(self):
