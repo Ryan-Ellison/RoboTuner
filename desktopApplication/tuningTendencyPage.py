@@ -8,8 +8,6 @@ sys.path.insert(0, pyaudioPath)
 print("path = " + str(sys.path))
 #import Tuner
 
-
-
 from PyQt6.QtWidgets import (
     QMainWindow,
     QLabel,
@@ -29,7 +27,7 @@ class TuningTendencyWindow(QMainWindow):
         file_name = str(sys.path[0]) + "/notes.json"
         file = open(file_name, "r")
         file_content = file.read()
-        notesDict = json.loads(file_content)
+        self.notesDict = json.loads(file_content)
 
 
         allLayout = QGridLayout()
@@ -39,16 +37,16 @@ class TuningTendencyWindow(QMainWindow):
         count_i = 0
         count_j = 0
         avgTendency = 0
-        for note in notesDict:
+        for note in self.notesDict:
             print(note)
             label = QLabel()
-            label.setText(" " + note + " - " + str(round(notesDict[note], 3)))
-            avgTendency += round(notesDict[note], 3)
+            label.setText(" " + note + " - " + str(round(self.notesDict[note], 3)))
+            avgTendency += round(self.notesDict[note], 3)
             allLayout.addWidget(label, count_i // 8, count_j % 8)
             count_i += 1
             count_j += 1
 
-        avgTendency /= len(notesDict)
+        avgTendency /= len(self.notesDict)
         mainLayout = QGridLayout()
         self.all = QWidget()
         self.computeAverage = QWidget()
@@ -61,35 +59,60 @@ class TuningTendencyWindow(QMainWindow):
         self.all.layout = allLayout
         self.all.setLayout(self.all.layout)
 
-        avgTendencyLabel = QLabel()
-        avgTendencyLabel.setText("Average Tendency = " + str(avgTendency))
+        self.avgTendencyLabel = QLabel()
+        self.avgTendencyLabel.setText("Average Tendency = " + str(avgTendency))
 
-        averageRangeTendency = QLabel()
-        averageRangeTendency.setText("Average Tendency = ")
+        self.averageRangeTendency = QLabel()
+        self.averageRangeTendency.setText("Average Tendency = ")
 
-        computeTendencyBoxLow = QLineEdit()
-        computeTendencyBoxLow.setText("From")
-        computeTendencyBoxHigh = QLineEdit()
-        computeTendencyBoxHigh.setText(("To"))
-        computeTendencyButton = QPushButton()
-        computeTendencyButton.setText("Compute")
-
-
-
-
+        self.computeTendencyBoxLow = QLineEdit()
+        self.computeTendencyBoxLow.setText("From")
+        self.computeTendencyBoxHigh = QLineEdit()
+        self.computeTendencyBoxHigh.setText(("To"))
+        self.computeTendencyButton = QPushButton()
+        self.computeTendencyButton.setText("Compute")
+        self.computeTendencyButton.clicked.connect(self.computeAverageRange)
 
         self.computeAverage.layout = QGridLayout()
-        self.computeAverage.layout.addWidget(avgTendencyLabel)
-        self.computeAverage.layout.addWidget(computeTendencyBoxLow)
-        self.computeAverage.layout.addWidget(computeTendencyBoxHigh)
-        self.computeAverage.layout.addWidget(computeTendencyButton)
-        self.computeAverage.layout.addWidget(averageRangeTendency)
+        self.computeAverage.layout.addWidget(self.avgTendencyLabel)
+        self.computeAverage.layout.addWidget(self.computeTendencyBoxLow)
+        self.computeAverage.layout.addWidget(self.computeTendencyBoxHigh)
+        self.computeAverage.layout.addWidget(self.computeTendencyButton)
+        self.computeAverage.layout.addWidget(self.averageRangeTendency)
         self.computeAverage.setLayout(self.computeAverage.layout)
 
         mainLayout.addWidget(self.tabs)
         self.setLayout(mainLayout)
 
         self.setCentralWidget(self.tabs)
+    def computeAverageRange(self):
+        print("Success")
+        low = self.computeTendencyBoxLow.text()
+        high = self.computeTendencyBoxHigh.text()
+        print(low)
+        print(high)
+
+        reachedLow = False
+        sum = 0.0
+        totalNotes = 0.0
+        print(self.notesDict)
+        for key in self.notesDict:
+            print(key)
+            if key == high:
+                print("BREAK")
+                break
+            if key == low:
+                print("Made it")
+                reachedLow = True
+
+            if reachedLow:
+                if (not self.notesDict[key] == 0):
+                    sum += self.notesDict[key]
+                    totalNotes += 1
+
+        self.averageRangeTendency.setText("Average Tendency = " + str((sum / totalNotes)))
+
+
 
 """
 app = QApplication(sys.argv)
