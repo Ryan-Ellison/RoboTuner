@@ -13,9 +13,10 @@ from PyQt6.QtWidgets import (
     QLabel,
     QGridLayout,
     QWidget,
-    QApplication, QTabWidget, QLineEdit, QPushButton
+    QApplication, QTabWidget, QLineEdit, QPushButton, QFrame,
 )
-from PyQt6.QtGui import QIntValidator
+from PyQt6.QtGui import QFont
+
 
 
 # Subclass QMainWindow to customize application's profile setting menu
@@ -41,8 +42,16 @@ class TuningTendencyWindow(QMainWindow):
             print(note)
             label = QLabel()
             label.setText(" " + note + " - " + str(round(self.notesDict[note], 3)))
+            font = QFont("Times", 12)
+
+
+            label.setFixedSize(125, 30)
+            label.setFont(font)
+            frame = QFrame()
+            frame.setFixedSize(100,12)
+            label.setFrameStyle(QFrame.Shape.Panel)
             avgTendency += round(self.notesDict[note], 3)
-            allLayout.addWidget(label, count_i // 8, count_j % 8)
+            allLayout.addWidget(label, count_i % 12, count_j // 12)
             count_i += 1
             count_j += 1
 
@@ -60,25 +69,44 @@ class TuningTendencyWindow(QMainWindow):
         self.all.setLayout(self.all.layout)
 
         self.avgTendencyLabel = QLabel()
+        self.avgTendencyLabel.setFixedHeight(16)
         self.avgTendencyLabel.setText("Average Tendency = " + str(avgTendency))
 
-        self.averageRangeTendency = QLabel()
-        self.averageRangeTendency.setText("Average Tendency = ")
+        self.lowBoxLabel = QLabel()
+        self.lowBoxLabel.setFixedHeight(16)
+        self.highBoxLabel = QLabel()
+        self.highBoxLabel.setFixedHeight(16)
+
+        self.lowBoxLabel.setText("From:")
+        self.highBoxLabel.setText("To:")
 
         self.computeTendencyBoxLow = QLineEdit()
-        self.computeTendencyBoxLow.setText("From")
+        self.computeTendencyBoxLow.setFixedHeight(16)
+        self.computeTendencyBoxLow.setText("C1")
         self.computeTendencyBoxHigh = QLineEdit()
-        self.computeTendencyBoxHigh.setText(("To"))
+        self.computeTendencyBoxHigh.setFixedHeight(16)
+        self.computeTendencyBoxHigh.setText(("B8"))
         self.computeTendencyButton = QPushButton()
+        self.computeTendencyButton.setFixedHeight(25)
         self.computeTendencyButton.setText("Compute")
         self.computeTendencyButton.clicked.connect(self.computeAverageRange)
 
+        self.averageRangeTendency = QLabel()
+        self.averageRangeTendency.setFixedHeight(16)
+        self.averageRangeTendency.setText("Average Tendency for Range "
+                                          + self.computeTendencyBoxLow.text()
+                                          + " -> "
+                                          + self.computeTendencyBoxHigh.text()
+                                          + " is: ")
+
         self.computeAverage.layout = QGridLayout()
-        self.computeAverage.layout.addWidget(self.avgTendencyLabel)
-        self.computeAverage.layout.addWidget(self.computeTendencyBoxLow)
-        self.computeAverage.layout.addWidget(self.computeTendencyBoxHigh)
-        self.computeAverage.layout.addWidget(self.computeTendencyButton)
-        self.computeAverage.layout.addWidget(self.averageRangeTendency)
+        self.computeAverage.layout.addWidget(self.avgTendencyLabel, 0, 0)
+        self.computeAverage.layout.addWidget(self.averageRangeTendency, 1, 0)
+        self.computeAverage.layout.addWidget(self.lowBoxLabel, 2, 0)
+        self.computeAverage.layout.addWidget(self.computeTendencyBoxLow, 3, 0)
+        self.computeAverage.layout.addWidget(self.highBoxLabel, 4, 0)
+        self.computeAverage.layout.addWidget(self.computeTendencyBoxHigh, 5, 0)
+        self.computeAverage.layout.addWidget(self.computeTendencyButton, 6, 0)
         self.computeAverage.setLayout(self.computeAverage.layout)
 
         mainLayout.addWidget(self.tabs)
@@ -89,20 +117,15 @@ class TuningTendencyWindow(QMainWindow):
         print("Success")
         low = self.computeTendencyBoxLow.text()
         high = self.computeTendencyBoxHigh.text()
-        print(low)
-        print(high)
 
         reachedLow = False
         sum = 0.0
         totalNotes = 0.0
         print(self.notesDict)
         for key in self.notesDict:
-            print(key)
             if key == high:
-                print("BREAK")
                 break
             if key == low:
-                print("Made it")
                 reachedLow = True
 
             if reachedLow:
@@ -110,8 +133,12 @@ class TuningTendencyWindow(QMainWindow):
                     sum += self.notesDict[key]
                     totalNotes += 1
 
-        self.averageRangeTendency.setText("Average Tendency = " + str((sum / totalNotes)))
-
+        self.averageRangeTendency.setText("Average Tendency for Range: "
+                                          + self.computeTendencyBoxLow.text()
+                                          + " -> "
+                                          + self.computeTendencyBoxHigh.text()
+                                          + " is: "
+                                          + str((sum / totalNotes)))
 
 
 """
