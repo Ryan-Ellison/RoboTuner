@@ -39,6 +39,7 @@ class TabManager(QMainWindow):
         self.tabs.addTab(self.cadFilesWindow, "CAD Files")
         self.tabs.addTab(self.noteDiplayPage, "Display Note")
         self.tabs.addTab(self.hardwareSpecificationsPage, "Hardware Specifications")
+        self.tabs.addTab(self.tuningTendencyWindow, "Tuning Information")
 
 
         # self.tabs.tabBarClicked.connect(self.tabSelected)
