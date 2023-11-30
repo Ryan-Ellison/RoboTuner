@@ -22,6 +22,7 @@ class Display:
 		_.data_str = "mode: {0}\nnote:      {1}\ncents off: {2}\n"
 		_.homing_str = "homing..."
 		_.res_det_str = "RESISTANCE DETECTED\n\nPlease lubricate\nyour tuning slide"
+		_.check_complete_str = "Hardware check complete\nRefer to Hardware Assembly tab"
 		
 		# ~ _.update_display(startup_msg)
 
@@ -45,6 +46,9 @@ class Display:
 		
 	def res_detected(_):
 		_.update_display(_.res_det_str)
+
+	def hardware_check(_):
+		_.update_display(_.check_complete_str)
 
 # ~ import time
 # ~ dis = Display()

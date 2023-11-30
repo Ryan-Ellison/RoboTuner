@@ -45,6 +45,8 @@ prev_note_freq = None
 
 # button setup to switch between modes
 button_timer = 0
+clicked = 0
+seconds = 0
 mode_switch = False
 rp_button = Button(3, hold_time=2, hold_repeat=True)
 hold_repeated = False
@@ -67,7 +69,25 @@ def switch_modes():
         time.sleep(0.2)
         motor.set_led((1, 0, 0))
         hold_repeated = False
+
+def triple_click():
+    global seconds
+    global clicked
+    clicked = clicked + 1
+    if clicked == 1:
+        seconds = time.time()
+    elif clicked == 3 and seconds - time.time() < 5:
+        clicked = 0
+        hardwareCheck()
+
+def hardwareCheck():
+    motor.home()
+    motor.push(max_dist)
+    motor.home()
+    display.hardware_check()
+
 rp_button.when_held = switch_modes
+rp_button.when_pressed = triple_click
 
 # Creates a list of all notes
 notes = Tuner.initialize_notes()
