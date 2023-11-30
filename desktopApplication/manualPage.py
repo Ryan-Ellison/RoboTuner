@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout, QApplication, QTabWidget
 )
 from PyQt6.QtGui import QIntValidator
+from PyQt6.QtCore import Qt
 
 
 # Subclass QMainWindow to customize application's profile setting menu
@@ -52,6 +53,35 @@ class ManualWindow(QMainWindow):
         self.index.layout.addWidget(self.indexLabel)
         self.index.setLayout(self.index.layout)
 
+        #add content to usage tab
+        self.usage.layout = QGridLayout()
+        self.usageContent = QLabel()
+        self.usageContent.setText("""
+            1. Turning on the RoboTuner
+                - When turning on the device, it will first auto home by moving the tuning slide into the instrument
+                - The display will show when it is homing and show once it is ready for you to start playing
+                - Make sure to attach the the contact mic to the horn of your instrument
+                                  
+            2. Modes
+                - Switch between modes by press and holding the button for 2 seconds
+                                  
+                a. Auto Tuning Mode
+                    - The device will always start in this mode on startup
+                    - This mode will automatically move the tuning slide according to how many cents off the current tuning is
+                    - While in this mode, the device will shine red and stop moving if it detects too much resistance in the tuning slide
+                        - If this happens, please grease your tuning slide and restart the device
+                b. Reference Pitch Mode
+                    - This mode will play a reference pitch shortly after a note is played so the user can adjust the tuning slide manually
+                                  
+            3. Hardware Check
+                - Triple click the button within 5 seconds and the device will perform a hardware check by pulling the tuning slide all
+                    the way in, then pushing it out all the way, and pulling it back in again. If this works properly the tuning slide
+                    won't pop out and the device will be ready to use!
+                                  
+        """)
+        self.usageContent.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.usage.layout.addWidget(self.usageContent)
+        self.usage.setLayout(self.usage.layout)
 
         layout.addWidget(self.tabs)
         self.setLayout(layout)
@@ -61,8 +91,8 @@ class ManualWindow(QMainWindow):
         self.setCentralWidget(container)
 
 
-app = QApplication(sys.argv)
+'''app = QApplication(sys.argv)
 window = ManualWindow()
 window.show()
 
-app.exec()
+app.exec()'''
