@@ -1,13 +1,13 @@
 import sys
 import os
 from instrumentProfiles import InstrumentProfile
-from 
 from datetime import datetime
 from functools import cmp_to_key
 from pathlib import Path
 import paramiko
 import shutil
 import re
+import time
 
 from PyQt6.QtWidgets import (
     QComboBox, 
@@ -30,7 +30,8 @@ from PyQt6.QtCore import QDir
 # Subclass QMainWindow to customize application's profile setting menu
 class ProfileInputWindow(QMainWindow):
 
-    RASPBERRYPIPATH = "10.186.35.57"
+    #RASPBERRYPIPATH = "10.186.35.57"
+    RASPBERRYPIPATH = "192.168.4.28"
 
     def __init__(self) -> None:
         super().__init__()
@@ -144,7 +145,7 @@ class ProfileInputWindow(QMainWindow):
         self.setCentralWidget(container)
 
     def importExportProfiles(self):
-
+        print("temp")
 
     # Reset raspberry pi files
     def resetRaspberryPiConfirmation(self):
@@ -170,17 +171,28 @@ class ProfileInputWindow(QMainWindow):
 
     def resetRaspberryPi(self):
         ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
-        ssh.connect(self.RASPBERRYPIPATH, username="pi", password="raspberry")
+        try:
+            ssh.connect(self.RASPBERRYPIPATH, username="pi", password="raspberry", timeout=10)
+        except Exception as error:
+            print(error)
+            self.generateWarningDialog("Raspberry Pi not found", "Raspberry Pi not found")
+            ssh.close()
+            return
         sftp = ssh.open_sftp()
-        print("Deleting files")
-        sftp.rmdir("zipTester")
+        zipTest = "zipTest"
+        stdin, stdout, stderr = ssh.exec_command("ls")
+        if (zipTest + "\n") in stdout.readlines():
+            print("Deleting files")
+            ssh.exec_command("rm -rf " + zipTest)
+            time.sleep(3)
+            
         print("Transferring new zipped files")
-        zippedFilesPath = str(Path(__file__).parent) + "/.zipTester.zip"
-        sftp.put(zippedFilesPath, "zipTester.zip")
+        zippedFilesPath = str(Path(__file__).parent) + "/" + zipTest + ".zip"
+        sftp.put(zippedFilesPath, zipTest + ".zip")
         print("Unzipping files")
-        stdin, stdout, stderr = ssh.exec_command("unzip zipTester.zip")
-        stdout.read()
+        stdin, stdout, stderr = ssh.exec_command("unzip " + zipTest)
         print("fin")
         
 
@@ -192,7 +204,7 @@ class ProfileInputWindow(QMainWindow):
         try:
             ssh.connect(self.RASPBERRYPIPATH, username="pi", password="raspberry", timeout=10)
         except:
-            self.generateWarningDialog("Raspberry Pi not found", "Raspberry Pi not fount")
+            self.generateWarningDialog("Raspberry Pi not found", "Raspberry Pi not found")
             ssh.close()
             return
         sftp = ssh.open_sftp()
@@ -210,7 +222,7 @@ class ProfileInputWindow(QMainWindow):
         try:
             ssh.connect(self.RASPBERRYPIPATH, username="pi", password="raspberry", timeout=10)
         except:
-            self.generateWarningDialog("Raspberry Pi not found", "Raspberry Pi not fount")
+            self.generateWarningDialog("Raspberry Pi not found", "Raspberry Pi not found")
             ssh.close()
             return
         sftp = ssh.open_sftp()

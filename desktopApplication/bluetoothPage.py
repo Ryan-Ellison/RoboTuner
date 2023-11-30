@@ -75,22 +75,43 @@ class bluetoothPage(QMainWindow):
                                                                     name=device.name(),
                                                                     rssi=device.rssi()))
             if device.name() == "raspberrypi":
+                print("\n\n!!rp found!!!\n\n")
                 self.connectToPi(device)
                 break
 
     def connectToPi(self, device):
-        self.sock = QBluetoothSocket(QBluetoothServiceInfo.Protocol(3))
+        self.sock = QBluetoothSocket(QBluetoothServiceInfo.Protocol(2))
 
         self.sock.connected.connect(self.connectedToBluetooth)
         #self.sock.readyRead.connect(self.receivedBluetoothMessage)
         self.sock.disconnected.connect(self.disconnectedFromBluetooth)
         self.sock.errorOccurred.connect(self.socketError)
-        port = 1
+        for address in PyQtBt.QBluetoothLocalDevice(self).connectedDevices():
+            if address.toString().strip() == "B8:27:EB:6C:CE:50":
+                print("Already connected")
+
+        port = 1025
         print(device.address().toString())
-        self.sock.connectToService(device.address(),port)
+        rpGeneralAccessUuid = "{00001801-0000-1000-8000-00805f9b34fb}"
+        idx = 0
+        for i in range(len(device.serviceUuids())):
+            if rpGeneralAccessUuid == device.serviceUuids()[i].toString():
+                idx = i
+                print("idx: ", idx)
+                break
+        self.sock.connectToService(device.address(), device.serviceUuids()[idx])
 
     def connectedToBluetooth(self):
         print("connected :)")
+        try:
+            self.sock.write("test".encode())
+            print("success")
+        except Exception as error:
+            print("\n\n", error, "\n\n")
+            print("error sending")
+        print("disconnecting post message")
+        self.sock.disconnect()
+        print("should be disconnected post message")
     
     def socketError(self, error):
         print(error)
