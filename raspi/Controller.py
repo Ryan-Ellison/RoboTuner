@@ -79,10 +79,12 @@ def triple_click():
     elif clicked == 3 and seconds - time.time() < 5:
         clicked = 0
         hardwareCheck()
+    elif clicked > 3 and seconds - time.time() >= 5:
+        clicked = 0
 
 def hardwareCheck():
     motor.home()
-    motor.push(max_dist)
+    motor.push(max_dist, wait=True)
     motor.home()
     display.hardware_check()
 
