@@ -12,7 +12,11 @@ from PyQt6.QtWidgets import (
     QInputDialog,
     QDialog,
     QDialogButtonBox,
-    QVBoxLayout, QApplication, QTabWidget
+    QVBoxLayout, QApplication, QTabWidget,
+    QDockWidget,
+    QListWidget,
+    QTextEdit,
+    QScrollArea 
 )
 from PyQt6.QtGui import QIntValidator
 
@@ -59,6 +63,41 @@ class ManualWindow(QMainWindow):
         container = QWidget()
         container.setLayout(layout)
         self.setCentralWidget(container)
+
+        #add content to assembly tab
+        self.assembly.layout = QGridLayout()
+
+        #Component List Header
+        self.assemblyLabel = QLabel()
+        self.assemblyLabel.setText("<b>List of Components:</b>")
+        self.assembly.layout.addWidget(self.assemblyLabel, 0, 0)
+        self.assembly.layout.setRowStretch(0, 0)
+        self.assembly.setLayout(self.assembly.layout)
+
+        self.assemblyText = QTextEdit()
+        self.assemblyText.append("Hello")
+        self.assembly.layout.addWidget(self.assemblyText, 1, 1)
+
+        #Component List
+        self.assemblyItemList = QListWidget()
+        self.assemblyItemList.insertItem(0, "List")
+        self.assembly.layout.addWidget(self.assemblyItemList, 1, 0)
+        self.assembly.layout.setRowStretch(1, 25)
+
+        #Assembly Instructions Header
+        self.assemblyLabel = QLabel()
+        self.assemblyLabel.setText("<b>Hardware Assembly Instructions:</b>")
+        self.assembly.layout.addWidget(self.assemblyLabel, 2, 0)
+        self.assembly.layout.setRowStretch(0, 0)
+
+        #Hardware Assembly Instructions
+        self.assemblyText = QTextEdit()
+        self.assemblyText.append("1. Scream incredibly loung\n2. Probably start crying\n3. Finish crying and get a move on")
+        self.assembly.layout.addWidget(self.assemblyText, 3, 0)
+        self.assembly.layout.setRowStretch(3, 50)
+
+
+
 
 
 app = QApplication(sys.argv)

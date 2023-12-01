@@ -12,7 +12,8 @@ sends instructions to the tuner that tell it
 what to do
 
 """
-import Motor as motor
+from Motor import Motor
+from Display import Display
 import json
 import pyaudio
 import statistics as stat
@@ -34,6 +35,9 @@ SAMPLING_RATE = 44100
 FORMAT = pyaudio.paInt16
 TOLERANCE = .85 # Confidence threshold
 
+# Create Display object
+display = Display()
+
 # Initialize buzzer pins for reference pitch
 ref_pitch = TonalBuzzer(12, octaves=3)
 ref_pitch.stop()
@@ -41,6 +45,8 @@ prev_note_freq = None
 
 # button setup to switch between modes
 button_timer = 0
+clicked = 0
+seconds = 0
 mode_switch = False
 rp_button = Button(3, hold_time=2, hold_repeat=True)
 hold_repeated = False
@@ -62,7 +68,26 @@ def switch_modes():
         motor.set_led((0, 0, 0))
         time.sleep(0.2)
         motor.set_led((1, 0, 0))
+        hold_repeated = False
+
+def triple_click():
+    global seconds
+    global clicked
+    clicked = clicked + 1
+    if clicked == 1:
+        seconds = time.time()
+    elif clicked == 3 and seconds - time.time() < 5:
+        clicked = 0
+        hardwareCheck()
+
+def hardwareCheck():
+    motor.home()
+    motor.push(max_dist)
+    motor.home()
+    display.hardware_check()
+
 rp_button.when_held = switch_modes
+rp_button.when_pressed = triple_click
 
 # Creates a list of all notes
 notes = Tuner.initialize_notes()
@@ -74,7 +99,6 @@ max_speed = int(f.readline())
 #max_dist = 70
 #max_speed = 60
 f.close()
-
 motor = Motor(max_dist)
 motor.set_speed(motor.mm_to_steps(max_speed))
 
@@ -133,6 +157,7 @@ while True:
             if not mode_switch:
                 motor.set_led((0, 1, 0))
             else:
+                display.update_data(False)
                 motor.set_led((0, 0, 1))
         if not timer_set:
             timer = halt_timer = time.time()
@@ -156,6 +181,7 @@ while True:
         continue
 
     timer_set = False
+    hold_repeated = False
 
     # Convert pitch to midi value
     midi = int(round(stat.median(pitch[1])))
@@ -183,6 +209,8 @@ while True:
     print("Note = " + nearest_note.name + " Cents: " + str(tendency) +
          " Average tendency " + str(nearest_note.get_tendency()) +
          " Times Played: " + str(nearest_note.total_times_played))
+         
+    display.update_data(mode=not mode_switch, note=nearest_note.name, cents_off=str(tendency))
 
 
     if not mode_switch:

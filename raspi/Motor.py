@@ -1,7 +1,7 @@
 from TMC_2209.TMC_2209_StepperDriver import *
 import time
 from gpiozero import RGBLED
-
+from Display import Display
 
 class Motor:
 	tmc = None
@@ -12,6 +12,7 @@ class Motor:
 		_.max_accel = accel
 		_.max_speed = speed
 		_.ms_res = ms_res
+		_.homing = False
 		
 		_.tmc = TMC_2209(en_pin, step_pin, dir_pin)
 		_.tmc.set_movement_abs_rel(MovementAbsRel.RELATIVE)
@@ -29,6 +30,8 @@ class Motor:
 		
 		_.led = RGBLED(5, 6, 13)
 		
+		_.display = Display()
+		
 		_.tmc.run_to_position_steps_threaded(1)
 		
 	def deinit(_, complete=True):
@@ -43,15 +46,19 @@ class Motor:
 		return steps/0.95/_.ms_res*0.04
 
 	def home(_):
+		_.homing = True
 		_.tmc.run_to_position_steps(_.mm_to_steps(-_.max_dist))
 		time.sleep(0.1)
 		_.tmc.run_to_position_steps(_.mm_to_steps(1))
 
 	def stall_callback(_, channel):
-		if (_.tmc.get_stallguard_result() != 0):
-			print("StallGuard!	:	", _.tmc.get_stallguard_result())
-			_.tmc.stop(stop_mode=StopMode.HARDSTOP)
-			_.set_led((1, 0, 0))
+		# ~ print("--- s t a l l g u a r d ---")
+		# ~ if (_.tmc.get_stallguard_result() != 0):
+		print("StallGuard!	:	", _.tmc.get_stallguard_result())
+		_.tmc.stop(stop_mode=StopMode.HARDSTOP)
+		_.set_led((1, 0, 0))
+		if not _.homing: _.display.res_detected()
+		else: _.display.update_display("Homed!\nstarting\nROBOTUNER")
 			
 	def push(_, dist=1, wait=False):
 		prev_color = _.led.value
