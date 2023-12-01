@@ -32,15 +32,15 @@ class ManualWindow(QMainWindow):
 
         layout = QGridLayout()
 
-        self.setFixedWidth(1000)
-        self.setFixedHeight(1000)
+        #self.setFixedWidth(1000)
+        #self.setFixedHeight(1000)
 
         self.tabs = QTabWidget()
         self.index = QWidget()
         self.assembly = QWidget()
         self.configuration = QWidget()
         self.usage = QWidget()
-        self.tabs.resize(1000,1000)
+        #self.tabs.resize(1000,1000)
 
         self.indexLabel = QLabel()
         self.indexLabel.setText("Hello There!")

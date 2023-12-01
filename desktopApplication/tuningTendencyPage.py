@@ -31,6 +31,8 @@ class TuningTendencyWindow(QMainWindow):
 
 
         allLayout = QGridLayout()
+        allLayout.setHorizontalSpacing(0)
+        allLayout.setVerticalSpacing(0)
         # Create a button and a variable that tracks if the button is toggled
         note_names = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
         octaves = [1, 2, 3, 4, 5, 6, 7, 8]

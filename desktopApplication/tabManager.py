@@ -7,6 +7,7 @@ from noteDisplayPage import NoteDisplayPage
 from hardwareSpecificationsPage import HardwareSpecificationsPage
 from tuningTendencyPage import TuningTendencyWindow
 from manualPage import ManualWindow
+from bluetoothPage import bluetoothPage
 
 from PyQt6.QtWidgets import (
     QApplication,
@@ -33,8 +34,7 @@ class TabManager(QMainWindow):
         self.hardwareSpecificationsPage = HardwareSpecificationsPage()
         self.tuningTendencyWindow = TuningTendencyWindow()
         self.manualWindow = ManualWindow()
-
-        # self.timer = QTimer(self)
+        self.bluetoothWindow = bluetoothPage()
 
         self.tabs.addTab(self.landingPage, "Landing Page")
         self.tabs.addTab(self.profileInputWindow, "Edit settings")
@@ -43,21 +43,10 @@ class TabManager(QMainWindow):
         self.tabs.addTab(self.hardwareSpecificationsPage, "Hardware Specifications")
         self.tabs.addTab(self.tuningTendencyWindow, "Tuning Information")
         self.tabs.addTab(self.manualWindow, "Manual")
-
-
-        # self.tabs.tabBarClicked.connect(self.tabSelected)
+        self.tabs.addTab(self.bluetoothWindow, "Bluetooth example")
 
         self.setCentralWidget(self.tabs)
     
-    """
-    def tabSelected(self):
-        if self.tabs.currentIndex() == 3:
-            self.timer.setSingleShot(False)
-            self.timer.timeout.connect(self.noteDiplayPage.callPitch)
-            self.timer.start(200)
-        else:
-            self.timer.setSingleShot(True)
-    """
 """
 # PATH = "/Users/ryanellison/VSCode Projects/RoboTuner/"
 

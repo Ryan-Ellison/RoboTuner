@@ -22,10 +22,96 @@ from PyQt6.QtWidgets import (
     QDialogButtonBox, 
     QVBoxLayout,
     QFileDialog,
-    QApplication
+    QApplication,
+    QRadioButton,
+    QButtonGroup,
+    QHBoxLayout
 )
 from PyQt6.QtGui import QIntValidator
 from PyQt6.QtCore import QDir
+ 
+class ImportExportWindow(QMainWindow):
+    def __init__(self, runningWindow):
+        super().__init__()
+
+        self.runningWindow = runningWindow
+
+        self.exportProfileButton = QPushButton("Export Profiles To Desktop")
+        self.importProfileButton = QPushButton("Import Profiles From Desktop")
+        self.exportProfilesToRPButton = QPushButton("Export Profiles To Device")
+        self.importProfilesFromRPButton = QPushButton("Import Profiles From Device")
+        self.confirmButton = QPushButton("Confirm Action")
+
+        self.exportProfileButton.clicked.connect(self.runningWindow.exportProfiles)
+        self.importProfileButton.clicked.connect(self.runningWindow.importProfiles)
+        self.exportProfilesToRPButton.clicked.connect(self.runningWindow.exportProfilesToRaspberryPi)
+        self.importProfilesFromRPButton.clicked.connect(self.runningWindow.importProfilesFromRaspberryPi)
+        self.confirmButton.clicked.connect(self.confirmAction)
+
+        self.connectionTypeRadioGroup = QButtonGroup(self)
+
+        self.connectionLabel = QLabel("Connection Method:")
+        self.desktopRadio = QRadioButton("Current Device", self)
+        self.wifiRadio = QRadioButton("Wifi/Ethernet", self)
+        self.bluetoothRadio = QRadioButton("Bluetooth", self)
+
+        connectionColumn = QVBoxLayout()
+        connectionColumn.addWidget(self.connectionLabel)
+
+        connections = [self.desktopRadio, self.wifiRadio, self.bluetoothRadio]
+        for connection in connections:
+            self.connectionTypeRadioGroup.addButton(connection)
+            connectionColumn.addWidget(connection)
+
+        self.importExportGroup = QButtonGroup(self)
+        self.importExportLabel = QLabel("Action")
+        self.importRadio = QRadioButton("Import Profiles", self)
+        self.exportRadio = QRadioButton("Export Profiles", self)
+
+        actionColumn = QVBoxLayout()
+        actionColumn.addWidget(self.importExportLabel)
+
+        actions = [self.importRadio, self.exportRadio]
+        for action in actions:
+            self.importExportGroup.addButton(action)
+            actionColumn.addWidget(action)
+
+        layout = QVBoxLayout()
+        columns = QHBoxLayout()
+        columns.addLayout(connectionColumn)
+        columns.addLayout(actionColumn)
+        layout.addLayout(columns)
+        layout.addWidget(self.confirmButton)
+
+        # Utilize the layout as a widget
+        container = QWidget()
+        container.setLayout(layout)
+
+        # Place the layout in the app window
+        self.setCentralWidget(container)
+
+    def confirmAction(self):
+        if self.importRadio.isChecked():
+            if self.desktopRadio.isChecked():
+                self.runningWindow.importProfiles()
+            elif self.wifiRadio.isChecked():
+                self.runningWindow.importProfilesFromRaspberryPi()
+            elif self.bluetoothRadio.isChecked():
+                self.runningWindow.generateWarningDialog("Bluetooth is in progress", "Bluetooth development is in progress")
+            else:
+                self.runningWindow.generateWarningDialog("Invalid Selection", "Invalid Selection")
+        elif self.exportRadio.isChecked():
+            if self.desktopRadio.isChecked():
+                self.runningWindow.exportProfiles()
+            elif self.wifiRadio.isChecked():
+                self.runningWindow.exportProfilesToRaspberryPi()
+            elif self.bluetoothRadio.isChecked():
+                self.runningWindow.generateWarningDialog("Bluetooth is in progress", "Bluetooth development is in progress")
+            else:
+                self.runningWindow.generateWarningDialog("Invalid Selection", "Invalid Selection")
+        else:
+            self.runningWindow.generateWarningDialog("Invalid selection", "Invalid Selection")
+        
 
 # Subclass QMainWindow to customize application's profile setting menu
 class ProfileInputWindow(QMainWindow):
@@ -47,13 +133,11 @@ class ProfileInputWindow(QMainWindow):
         self.renameProfileButton = QPushButton("Rename Current Profile")
         self.sortOrderButton = QPushButton("Sort By Date")
         self.sortByName = True
-        self.exportProfileButton = QPushButton("Export Profiles To Desktop")
-        self.importProfileButton = QPushButton("Import Profiles From Desktop")
         self.updateRaspberryPiButton = QPushButton("Update Raspberry Pi")
-        self.exportProfilesToRPButton = QPushButton("Export Profiles To Device")
-        self.importProfilesFromRPButton = QPushButton("Import Profiles From Device")
         self.resetRaspberryPiButton = QPushButton("Reset Raspberry Pi Files")
         self.importExportProfilesButton = QPushButton("Import/Export Profiles To/From Device")
+
+        self.importExportWindow = ImportExportWindow(self)
 
         # Link the button with created functions and toggle variable
         self.saveButton.clicked.connect(self.saveProfile)
@@ -63,11 +147,7 @@ class ProfileInputWindow(QMainWindow):
         self.renameProfileButton.clicked.connect(self.renameProfile)
         self.sortOrderButton.clicked.connect(self.swapSortOrder)
         self.sortOrderButton.setCheckable(True)
-        self.exportProfileButton.clicked.connect(self.exportProfiles)
-        self.importProfileButton.clicked.connect(self.importProfiles)
         self.updateRaspberryPiButton.clicked.connect(self.updateRaspberryPi)
-        self.exportProfilesToRPButton.clicked.connect(self.exportProfilesToRaspberryPi)
-        self.importProfilesFromRPButton.clicked.connect(self.importProfilesFromRaspberryPi)
         self.resetRaspberryPiButton.clicked.connect(self.resetRaspberryPiConfirmation)
         self.importExportProfilesButton.clicked.connect(self.importExportProfiles)
 
@@ -129,13 +209,9 @@ class ProfileInputWindow(QMainWindow):
         layout.addWidget(self.createProfileButton, 5, 0)
         layout.addWidget(self.deleteProfileButton, 5, 1)
         layout.addWidget(self.renameProfileButton, 5, 2)
-        layout.addWidget(self.exportProfileButton, 6, 0)
-        layout.addWidget(self.importProfileButton, 6, 1)
         layout.addWidget(self.updateRaspberryPiButton, 6, 2)
-        layout.addWidget(self.exportProfilesToRPButton, 7, 0)
-        layout.addWidget(self.importProfilesFromRPButton, 7, 1)
-        layout.addWidget(self.resetRaspberryPiButton, 8, 0)
-        layout.addWidget(self.importExportProfilesButton, 8, 1)
+        layout.addWidget(self.resetRaspberryPiButton, 6, 0)
+        layout.addWidget(self.importExportProfilesButton, 6, 1)
 
         # Utilize the layout as a widget
         container = QWidget()
@@ -145,7 +221,7 @@ class ProfileInputWindow(QMainWindow):
         self.setCentralWidget(container)
 
     def importExportProfiles(self):
-        print("temp")
+        self.importExportWindow.show()
 
     # Reset raspberry pi files
     def resetRaspberryPiConfirmation(self):
@@ -506,9 +582,10 @@ class ProfileInputWindow(QMainWindow):
 
         warning.exec()
 
-app = QApplication(sys.argv)
+        
+# app = QApplication(sys.argv)
 
-window = ProfileInputWindow()
-window.show()
+# window = ProfileInputWindow()
+# window.show()
 
-app.exec()
+# app.exec()

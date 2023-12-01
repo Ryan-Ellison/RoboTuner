@@ -124,9 +124,9 @@ class bluetoothPage(QMainWindow):
         self.discoveryAgent.stop()
 
 
-app = QApplication(sys.argv)
+# app = QApplication(sys.argv)
 
-window = bluetoothPage()
-window.show()
+# window = bluetoothPage()
+# window.show()
 
-app.exec()
+# app.exec()
