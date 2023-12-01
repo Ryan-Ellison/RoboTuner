@@ -1,9 +1,14 @@
 import time
 import sys
+import os
 
 from pathlib import Path
-pyaudioPath = str(Path(__file__).parent.parent) + "/raspi"
-sys.path.insert(0, pyaudioPath)
+# pyaudioPath = str(Path(__file__).parent.parent) + "/raspi"
+# sys.path.insert(0, pyaudioPath)
+PATH = sys.path[0] + "raspi"
+print("Path: " + PATH)
+print("cwd: " + os.getcwd())
+sys.path.insert(1, PATH)
 import pyaudio
 import statistics as stat
 import Tuner

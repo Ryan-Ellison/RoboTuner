@@ -34,7 +34,9 @@ class CADFilesWindow(QMainWindow):
         self.fileListView = QListView()
         self.fileBrowserView = QTreeView()
 
-        self.cadPath = QDir(str(Path(__file__).parent) + "/CADFiles/").absolutePath() + "/"
+        #self.cadPath = QDir(str(Path(__file__).parent) + "/CADFiles/").absolutePath() + "/"
+        self.cadPath = QDir(sys.path[0] + "desktopApplication/CADFiles/").absolutePath() + "/"
+
         self.fileModel = QFileSystemModel()
         self.fileModel.setRootPath(self.cadPath)
 

@@ -10,7 +10,8 @@ CS307 Group 14 RoboTuner
 7. python3 -m pip install paramiko
 
 # Desktop App Generating Command
-1. pyinstaller -F -w \--onefile \
-   --hidden-import='aubio' \
-   --hidden-import='wave' \
-   desktopApplication/tabManager.py
+1. pyinstaller -F -w --onefile --noconfirm \\
+--hidden-import='aubio' \\
+--hidden-import='wave' \\
+--hidden-import='raspi/Tuner.py' \\
+desktopApplication/tabManager.py

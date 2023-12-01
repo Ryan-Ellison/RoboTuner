@@ -102,7 +102,7 @@ class bluetoothPage(QMainWindow):
         self.sock.connectToService(device.address(), device.serviceUuids()[idx])
 
     def connectedToBluetooth(self):
-        print("connected :)")
+        print("connected")
         try:
             self.sock.write("test".encode())
             print("success")
@@ -111,7 +111,6 @@ class bluetoothPage(QMainWindow):
             print("error sending")
         print("disconnecting post message")
         self.sock.disconnect()
-        print("should be disconnected post message")
     
     def socketError(self, error):
         print(error)
@@ -124,9 +123,9 @@ class bluetoothPage(QMainWindow):
         self.discoveryAgent.stop()
 
 
-app = QApplication(sys.argv)
+# app = QApplication(sys.argv)
 
-window = bluetoothPage()
-window.show()
+# window = bluetoothPage()
+# window.show()
 
-app.exec()
+# app.exec()
