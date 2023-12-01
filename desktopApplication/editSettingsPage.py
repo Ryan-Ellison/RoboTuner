@@ -117,7 +117,7 @@ class ImportExportWindow(QMainWindow):
 # Subclass QMainWindow to customize application's profile setting menu
 class ProfileInputWindow(QMainWindow):
 
-    RASPBERRYPIPATH = "10.186.35.57"
+    RASPBERRYPIPATH = "10.186.33.37"
     #RASPBERRYPIPATH = "192.168.4.28"
 
     def __init__(self) -> None:
@@ -266,7 +266,8 @@ class ProfileInputWindow(QMainWindow):
             time.sleep(3)
             
         print("Transferring new zipped files")
-        zippedFilesPath = str(Path(__file__).parent) + "/" + zipTest + ".zip"
+        # zippedFilesPath = str(Path(__file__).parent) + "/" + zipTest + ".zip"
+        zippedFilesPath = sys.path[0] + "desktopApplication/" + zipTest + ".zip"
         sftp.put(zippedFilesPath, zipTest + ".zip")
         print("Unzipping files")
         stdin, stdout, stderr = ssh.exec_command("unzip " + zipTest)
@@ -502,8 +503,7 @@ class ProfileInputWindow(QMainWindow):
         
     # Loads the first profile if there are any already made, otherwise makes a default
     def loadProfiles(self):
-        defaultProfilesPath = str(Path(__file__).parent) + "/.profiles.txt"
-        self.profiles = self.readProfilesFromFile(defaultProfilesPath)
+        self.profiles = self.readProfilesFromFile()
         if len(self.profiles) == 0:
             self.profile = InstrumentProfile("Default")
             self.updateProfilesFiles()
@@ -512,12 +512,14 @@ class ProfileInputWindow(QMainWindow):
         self.setTextBoxesToProfile()
 
     # Reads through the profile save file and constructs all profiles
-    def readProfilesFromFile(self, file=str(Path(__file__).parent) + "/.profiles.txt") -> dict[str, InstrumentProfile]:
+    # def readProfilesFromFile(self, file=str(Path(__file__).parent) + "/.profiles.txt") -> dict[str, InstrumentProfile]:
+    def readProfilesFromFile(self, file=sys.path[0] + "desktopApplication/.profiles.txt") -> dict[str, InstrumentProfile]:
         profiles = dict()
         try:
             openFile = open(file, "r")
             print("file found")
         except IOError:
+            print(file)
             openFile = open(file, "w+")
             print("file not found")
         else:

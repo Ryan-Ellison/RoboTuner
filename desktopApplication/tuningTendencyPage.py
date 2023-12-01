@@ -5,10 +5,10 @@ from tkinter import *
 from datetime import date, datetime
 from pathlib import Path
 
-pyaudioPath = str(Path(__file__).parent.parent) + "/raspi"
-print("path = " + pyaudioPath)
-sys.path.insert(0, pyaudioPath)
-print("path = " + str(sys.path))
+# pyaudioPath = "/Users/ryanellison/VSCode Projects/RoboTuner/raspi"
+# print("path = " + pyaudioPath)
+# sys.path.insert(0, pyaudioPath)
+# print("path = " + str(sys.path))
 #import Tuner
 
 from PyQt6.QtWidgets import (
@@ -20,7 +20,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QFont
 
-file = str(sys.path[0]) + "/notes.json"
+file = str(sys.path[1]) + "/notes.json"
 # Subclass QMainWindow to customize application's profile setting menu
 class TuningTendencyWindow(QMainWindow):
     def __init__(self):
@@ -121,7 +121,7 @@ class TuningTendencyWindow(QMainWindow):
         self.computeAverage.layout.addWidget(self.computeTendencyButton, 6, 0)
         self.computeAverage.layout.addWidget(self.saveButton, 7, 0)
         i = 0
-        directory = os.fsencode(str(Path(__file__).parent) + "/savedTuningInformation")
+        directory = os.fsencode(sys.path[0] + "desktopApplication/savedTuningInformation")
 
         for file_json in os.listdir(directory):
             filename = os.fsdecode(file_json)
@@ -164,10 +164,10 @@ class TuningTendencyWindow(QMainWindow):
                                           + str((sum / totalNotes)))
 
     def saveTuningInfo(self):
-        if (self.numSaved > 4):
-            return
+        #if (self.numSaved > 4):
+            #return
 
-        file = open("savedTuningInformation/tuning-" + str(date.today()) + "-" + str(datetime.now()) + ".json",  "w")
+        file = open(sys.path[0] + "desktopApplication/savedTuningInformation/tuning-" + str(date.today()) + "-" + str(datetime.now()) + ".json",  "w")
 
         json_format = json.dumps(self.notesDict, indent=4)
 
@@ -179,7 +179,7 @@ class TuningTendencyWindow(QMainWindow):
 
     def loadTuning(self, toLoad):
         print("Pressed" + toLoad)
-        file_json = open("savedTuningInformation/" + toLoad, "r")
+        file_json = open(sys.path[0] + "desktopApplication/savedTuningInformation/" + toLoad, "r")
         file_content = file_json.read()
         self.notesDict = json.loads(file_content)
         file_json.close()
@@ -193,7 +193,8 @@ class TuningTendencyWindow(QMainWindow):
             newFile.write(line)
 
         newFile.close()
-        os.execl(sys.executable, sys.executable, *sys.argv)
+        #os.execl(sys.executable, sys.executable, *sys.argv)
+        self = TuningTendencyWindow()
 
 
 

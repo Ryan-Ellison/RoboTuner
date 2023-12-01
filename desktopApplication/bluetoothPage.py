@@ -102,7 +102,7 @@ class bluetoothPage(QMainWindow):
         self.sock.connectToService(device.address(), device.serviceUuids()[idx])
 
     def connectedToBluetooth(self):
-        print("connected :)")
+        print("connected")
         try:
             self.sock.write("test".encode())
             print("success")

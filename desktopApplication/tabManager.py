@@ -1,5 +1,11 @@
 import sys
 import os
+    
+PATH = "/Users/ryanellison/VSCode Projects/RoboTuner/"
+
+sys.path.insert(0, PATH)
+os.chdir(PATH)
+
 from editSettingsPage import ProfileInputWindow
 from landingPage import LandingPage
 from cadFilesPage import CADFilesWindow
@@ -14,6 +20,9 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QTabWidget,
 )
+    
+
+print("path in os: " + os.getcwd())
 
 
 class TabManager(QMainWindow):
@@ -48,13 +57,6 @@ class TabManager(QMainWindow):
         self.tabs.setMovable(True)
 
         self.setCentralWidget(self.tabs)
-    
-    
-PATH = "/Users/ryanellison/VSCode Projects/RoboTuner/"
-
-sys.path.insert(0, PATH)
-os.chdir(PATH)
-
 app = QApplication(sys.argv)
 
 window = TabManager()
