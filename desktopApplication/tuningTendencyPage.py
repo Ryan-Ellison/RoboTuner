@@ -1,7 +1,10 @@
 import json
 import os.path
 import sys
+from tkinter import *
+from datetime import date, datetime
 from pathlib import Path
+
 pyaudioPath = str(Path(__file__).parent.parent) + "/raspi"
 print("path = " + pyaudioPath)
 sys.path.insert(0, pyaudioPath)
@@ -13,20 +16,23 @@ from PyQt6.QtWidgets import (
     QLabel,
     QGridLayout,
     QWidget,
-    QApplication, QTabWidget, QLineEdit, QPushButton
+    QApplication, QTabWidget, QLineEdit, QPushButton, QFrame,
 )
-from PyQt6.QtGui import QIntValidator
+from PyQt6.QtGui import QFont
 
-
+file = str(sys.path[0]) + "/notes.json"
 # Subclass QMainWindow to customize application's profile setting menu
 class TuningTendencyWindow(QMainWindow):
     def __init__(self):
+        global file
+        print(str(file))
         super().__init__()
         # Define the title of the application
+        self.numSaved = 0
         self.setWindowTitle("Tuning Information")
-        file_name = str(sys.path[0]) + "/notes.json"
-        file = open(file_name, "r")
-        file_content = file.read()
+        #self.file_name = str(sys.path[0]) + "/notes.json"
+        file_json = open(file, "r")
+        file_content = file_json.read()
         self.notesDict = json.loads(file_content)
 
 
@@ -41,8 +47,16 @@ class TuningTendencyWindow(QMainWindow):
             print(note)
             label = QLabel()
             label.setText(" " + note + " - " + str(round(self.notesDict[note], 3)))
+            font = QFont("Times", 12)
+
+
+            label.setFixedSize(125, 30)
+            label.setFont(font)
+            frame = QFrame()
+            frame.setFixedSize(100,12)
+            label.setFrameStyle(QFrame.Shape.Panel)
             avgTendency += round(self.notesDict[note], 3)
-            allLayout.addWidget(label, count_i // 8, count_j % 8)
+            allLayout.addWidget(label, count_i % 12, count_j // 12)
             count_i += 1
             count_j += 1
 
@@ -60,25 +74,61 @@ class TuningTendencyWindow(QMainWindow):
         self.all.setLayout(self.all.layout)
 
         self.avgTendencyLabel = QLabel()
+        self.avgTendencyLabel.setFixedHeight(16)
         self.avgTendencyLabel.setText("Average Tendency = " + str(avgTendency))
 
-        self.averageRangeTendency = QLabel()
-        self.averageRangeTendency.setText("Average Tendency = ")
+        self.lowBoxLabel = QLabel()
+        self.lowBoxLabel.setFixedHeight(16)
+        self.highBoxLabel = QLabel()
+        self.highBoxLabel.setFixedHeight(16)
+
+        self.lowBoxLabel.setText("From:")
+        self.highBoxLabel.setText("To:")
 
         self.computeTendencyBoxLow = QLineEdit()
-        self.computeTendencyBoxLow.setText("From")
+        self.computeTendencyBoxLow.setFixedHeight(16)
+        self.computeTendencyBoxLow.setText("C1")
         self.computeTendencyBoxHigh = QLineEdit()
-        self.computeTendencyBoxHigh.setText(("To"))
+        self.computeTendencyBoxHigh.setFixedHeight(16)
+        self.computeTendencyBoxHigh.setText(("B8"))
         self.computeTendencyButton = QPushButton()
+        self.computeTendencyButton.setFixedHeight(25)
         self.computeTendencyButton.setText("Compute")
         self.computeTendencyButton.clicked.connect(self.computeAverageRange)
 
+        self.saveButton = QPushButton()
+        self.saveButton.setFixedHeight(25)
+        self.saveButton.setText("Save")
+        self.saveButton.clicked.connect(self.saveTuningInfo)
+
+        self.averageRangeTendency = QLabel()
+        self.averageRangeTendency.setFixedHeight(16)
+        self.averageRangeTendency.setText("Average Tendency for Range "
+                                          + self.computeTendencyBoxLow.text()
+                                          + " -> "
+                                          + self.computeTendencyBoxHigh.text()
+                                          + " is: ")
+
         self.computeAverage.layout = QGridLayout()
-        self.computeAverage.layout.addWidget(self.avgTendencyLabel)
-        self.computeAverage.layout.addWidget(self.computeTendencyBoxLow)
-        self.computeAverage.layout.addWidget(self.computeTendencyBoxHigh)
-        self.computeAverage.layout.addWidget(self.computeTendencyButton)
-        self.computeAverage.layout.addWidget(self.averageRangeTendency)
+        self.computeAverage.layout.addWidget(self.avgTendencyLabel, 0, 0)
+        self.computeAverage.layout.addWidget(self.averageRangeTendency, 1, 0)
+        self.computeAverage.layout.addWidget(self.lowBoxLabel, 2, 0)
+        self.computeAverage.layout.addWidget(self.computeTendencyBoxLow, 3, 0)
+        self.computeAverage.layout.addWidget(self.highBoxLabel, 4, 0)
+        self.computeAverage.layout.addWidget(self.computeTendencyBoxHigh, 5, 0)
+        self.computeAverage.layout.addWidget(self.computeTendencyButton, 6, 0)
+        self.computeAverage.layout.addWidget(self.saveButton, 7, 0)
+        i = 0
+        directory = os.fsencode("savedTuningInformation")
+
+        for file_json in os.listdir(directory):
+            filename = os.fsdecode(file_json)
+            self.button = QPushButton()
+            self.button.setFixedHeight(25)
+            self.button.setText(filename)
+            self.button.clicked.connect(lambda: self.loadTuning(self.button.text()))
+            self.computeAverage.layout.addWidget(self.button, 8 + i, 0)
+            i += 1
         self.computeAverage.setLayout(self.computeAverage.layout)
 
         mainLayout.addWidget(self.tabs)
@@ -86,23 +136,17 @@ class TuningTendencyWindow(QMainWindow):
 
         self.setCentralWidget(self.tabs)
     def computeAverageRange(self):
-        print("Success")
         low = self.computeTendencyBoxLow.text()
         high = self.computeTendencyBoxHigh.text()
-        print(low)
-        print(high)
 
         reachedLow = False
         sum = 0.0
         totalNotes = 0.0
         print(self.notesDict)
         for key in self.notesDict:
-            print(key)
             if key == high:
-                print("BREAK")
                 break
             if key == low:
-                print("Made it")
                 reachedLow = True
 
             if reachedLow:
@@ -110,7 +154,46 @@ class TuningTendencyWindow(QMainWindow):
                     sum += self.notesDict[key]
                     totalNotes += 1
 
-        self.averageRangeTendency.setText("Average Tendency = " + str((sum / totalNotes)))
+        self.averageRangeTendency.setText("Average Tendency for Range: "
+                                          + self.computeTendencyBoxLow.text()
+                                          + " -> "
+                                          + self.computeTendencyBoxHigh.text()
+                                          + " is: "
+                                          + str((sum / totalNotes)))
+
+    def saveTuningInfo(self):
+        if (self.numSaved > 4):
+            return
+
+        file = open("savedTuningInformation/tuning-" + str(date.today()) + "-" + str(datetime.now()) + ".json",  "w")
+
+        json_format = json.dumps(self.notesDict, indent=4)
+
+        for line in json_format:
+            file.write(line)
+
+        file.close()
+        self.numSaved = 0
+
+    def loadTuning(self, toLoad):
+        print("Pressed" + toLoad)
+        file_json = open("savedTuningInformation/" + toLoad, "r")
+        file_content = file_json.read()
+        self.notesDict = json.loads(file_content)
+        file_json.close()
+
+
+        json_format = json.dumps(self.notesDict, indent=4)
+        global file
+        print("da path = " + str(file))
+        newFile = open(file, "w")
+        for line in json_format:
+            newFile.write(line)
+
+        newFile.close()
+        os.execl(sys.executable, sys.executable, *sys.argv)
+
+
 
 
 
