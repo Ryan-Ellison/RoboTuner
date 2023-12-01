@@ -28,10 +28,13 @@ from PyQt6.QtCore import QDir
 # Subclass QMainWindow to customize application's profile setting menu
 class ProfileInputWindow(QMainWindow):
 
+    RASPBERRYPIPATH = "10.186.35.57"
+
     def __init__(self) -> None:
         super().__init__()
         # Define the title of the application
         self.setWindowTitle("RoboTuner Settings")
+        
 
         # Create a button and a variable that tracks if the button is toggled
         self.saveButton = QPushButton("Save Profile")
@@ -137,7 +140,7 @@ class ProfileInputWindow(QMainWindow):
         profilesPath = str(Path(__file__).parent) + "/.profiles.txt"
         ssh = paramiko.SSHClient()
         ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
-        ssh.connect("10.186.42.101", username="pi", password="raspberry")
+        ssh.connect(self.RASPBERRYPIPATH, username="pi", password="raspberry")
         sftp = ssh.open_sftp()
         if os.path.isfile(profilesPath):
             sftp.put(profilesPath, "profiles.txt")
@@ -152,7 +155,7 @@ class ProfileInputWindow(QMainWindow):
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            ssh.connect("10.186.42.101", username="pi", password="raspberry")
+            ssh.connect(self.RASPBERRYPIPATH, username="pi", password="raspberry", timeout=10)
         except:
             self.generateWarningDialog("Raspberry Pi not found", "Raspberry Pi not fount")
             ssh.close()
@@ -196,7 +199,7 @@ class ProfileInputWindow(QMainWindow):
         ssh = paramiko.SSHClient()
         try:
             ssh.load_host_keys(os.path.expanduser(os.path.join("~", ".ssh", "known_hosts")))
-            ssh.connect("10.186.42.101", username="pi", password="raspberry", timeout=10)
+            ssh.connect(self.RASPBERRYPIPATH, username="pi", password="raspberry", timeout=10)
         except:
             self.generateWarningDialog("Raspberry Pi not found", "Raspberry Pi not found")
             ssh.close()
