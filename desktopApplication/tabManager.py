@@ -45,15 +45,15 @@ class TabManager(QMainWindow):
         self.tabs.addTab(self.manualWindow, "Manual")
         self.tabs.addTab(self.bluetoothWindow, "Bluetooth example")
 
+        self.tabs.setMovable(True)
+
         self.setCentralWidget(self.tabs)
     
-"""
-# PATH = "/Users/ryanellison/VSCode Projects/RoboTuner/"
+    
+PATH = "/Users/ryanellison/VSCode Projects/RoboTuner/"
 
-# sys.path.insert(0, PATH)
-# os.chdir(PATH)
-
-"""
+sys.path.insert(0, PATH)
+os.chdir(PATH)
 
 app = QApplication(sys.argv)
 

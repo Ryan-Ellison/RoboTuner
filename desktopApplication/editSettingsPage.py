@@ -64,7 +64,7 @@ class ImportExportWindow(QMainWindow):
             connectionColumn.addWidget(connection)
 
         self.importExportGroup = QButtonGroup(self)
-        self.importExportLabel = QLabel("Action")
+        self.importExportLabel = QLabel("Action:")
         self.importRadio = QRadioButton("Import Profiles", self)
         self.exportRadio = QRadioButton("Export Profiles", self)
 
@@ -75,6 +75,7 @@ class ImportExportWindow(QMainWindow):
         for action in actions:
             self.importExportGroup.addButton(action)
             actionColumn.addWidget(action)
+        actionColumn.addWidget(QLabel(""))
 
         layout = QVBoxLayout()
         columns = QHBoxLayout()
@@ -116,8 +117,8 @@ class ImportExportWindow(QMainWindow):
 # Subclass QMainWindow to customize application's profile setting menu
 class ProfileInputWindow(QMainWindow):
 
-    #RASPBERRYPIPATH = "10.186.35.57"
-    RASPBERRYPIPATH = "192.168.4.28"
+    RASPBERRYPIPATH = "10.186.35.57"
+    #RASPBERRYPIPATH = "192.168.4.28"
 
     def __init__(self) -> None:
         super().__init__()

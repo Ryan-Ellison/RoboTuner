@@ -121,7 +121,7 @@ class TuningTendencyWindow(QMainWindow):
         self.computeAverage.layout.addWidget(self.computeTendencyButton, 6, 0)
         self.computeAverage.layout.addWidget(self.saveButton, 7, 0)
         i = 0
-        directory = os.fsencode("savedTuningInformation")
+        directory = os.fsencode(str(Path(__file__).parent) + "/savedTuningInformation")
 
         for file_json in os.listdir(directory):
             filename = os.fsdecode(file_json)

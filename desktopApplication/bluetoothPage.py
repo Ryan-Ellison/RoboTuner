@@ -111,7 +111,6 @@ class bluetoothPage(QMainWindow):
             print("error sending")
         print("disconnecting post message")
         self.sock.disconnect()
-        print("should be disconnected post message")
     
     def socketError(self, error):
         print(error)

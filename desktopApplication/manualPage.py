@@ -32,15 +32,11 @@ class ManualWindow(QMainWindow):
 
         layout = QGridLayout()
 
-        #self.setFixedWidth(1000)
-        #self.setFixedHeight(1000)
-
         self.tabs = QTabWidget()
         self.index = QWidget()
         self.assembly = QWidget()
         self.configuration = QWidget()
         self.usage = QWidget()
-        #self.tabs.resize(1000,1000)
 
         self.indexLabel = QLabel()
         self.indexLabel.setText("Hello There!")
@@ -158,11 +154,11 @@ class ManualWindow(QMainWindow):
         self.assemblyText.append("15. Reattach the same four screws to the raspberry pi box and secure as tightly as possible.\n")
         self.assemblyText.append("16. Attach the electronics attachments to the raspberry pi box and battery box.\n")
         self.assemblyText.append("17. Attach the raspberry pi box and battery box using the attachments to any point on the trombone that the length of the wires allows using the two Velcro straps on each attachment.\n")
-        self.assemblyText.append("18. Follow the steps below to test that the hardware is successfully attached.\n")
+        self.assemblyText.append("18. Follow the testing steps to test that the hardware is successfully attached.\n")
                                 
         self.assembly.layout.addWidget(self.assemblyText, 1, 0)
-        self.assembly.layout.setRowStretch(1, 2)
-        self.assembly.layout.setRowStretch(2, 1)
+        #self.assembly.layout.setRowStretch(1, 2)
+        #self.assembly.layout.setRowStretch(2, 1)
 
 
 
